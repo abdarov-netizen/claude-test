@@ -137,6 +137,10 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
     death_m   = np.full(n, months + 1, dtype=int)
     death_kind= np.zeros(n, dtype=int)   # 0 жив, 1 неплатёжеспособность, 2 добровольное закрытие
 
+    rec = cfg.get("_record_paths", True)
+    path = {k: np.zeros((months + 1, n)) for k in
+            ("revenue", "ebitda", "cash", "clients", "fte", "alive", "injected", "tax")} if rec else None
+
     disc_m    = (1.0 + hurdle_annual) ** (1.0 / 12.0)
     pv_flows  = np.zeros(n)
     rev_hist  = np.zeros((12, n))
@@ -280,6 +284,16 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
         cash -= dist
         pv_flows += dist / disc_m ** t
 
+        if rec:
+            path["revenue"][t] = np.where(a, revenue, 0.0)
+            path["ebitda"][t]  = np.where(a, ebitda, 0.0)
+            path["cash"][t]    = np.where(alive, cash, 0.0)
+            path["clients"][t] = np.where(alive, clients, 0.0)
+            path["fte"][t]     = np.where(alive, fte_del + fte_sal, 0.0)
+            path["alive"][t]   = alive.astype(float)
+            path["injected"][t]= injected
+            path["tax"][t]     = np.where(a, tax + vat_pay, 0.0)
+
         rev_hist[t % 12] = np.where(a, revenue, 0.0)
         ebitda_hist[t % 12] = np.where(a, ebitda, 0.0)
         cum_rev += np.where(a, revenue, 0.0)
@@ -295,7 +309,24 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
     return dict(npv=pv_flows, alive=alive, fail_launch=fail_launch, no_demand=nodemand, delay=delay, injected=injected, ebitda_ttm=ebitda_ttm,
                 rev_ttm=rev_hist.sum(axis=0), tv=tv, death_month=death_m, death_kind=death_kind,
                 clients=clients, peak_capital=peak_need, first_rev_month=first_rev_m,
-                competitor=comp_in, cum_rev=cum_rev)
+                competitor=comp_in, cum_rev=cum_rev, path=path)
+
+
+def path_table(res, months=60):
+    """Помесячная сводка: медиана и квартили по ВЫЖИВШИМ на каждый месяц + доля живых."""
+    p = res["path"]
+    rows = []
+    for t in range(1, months + 1):
+        al = p["alive"][t] > 0.5
+        sel = lambda k: p[k][t][al]
+        row = {"month": t, "P_alive": float(al.mean())}
+        for k in ("revenue", "ebitda", "cash", "clients", "fte", "injected", "tax"):
+            v = sel(k)
+            row[k + "_p25"] = float(np.percentile(v, 25)) if v.size else 0.0
+            row[k + "_med"] = float(np.median(v)) if v.size else 0.0
+            row[k + "_p75"] = float(np.percentile(v, 75)) if v.size else 0.0
+        rows.append(row)
+    return rows
 
 
 def _deep_merge(a, b):
