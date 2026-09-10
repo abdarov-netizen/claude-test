@@ -25,7 +25,7 @@ def parse_file(path):
     out = []
     for p in parts:
         head, _, body = p.partition("\n")
-        m = re.match(r'([A-ZА-Я]{2,5}-\d{2,3})\s*[—\-–:]\s*(.+)', head.strip())
+        m = re.match(r'([A-ZА-Я]{2,5}(?:-[A-ZА-Я])?-\d{2,3})\s*[—\-–:]\s*(.+)', head.strip())
         if not m:
             continue
         idea = {"id": m.group(1).strip(), "name": m.group(2).strip(),
