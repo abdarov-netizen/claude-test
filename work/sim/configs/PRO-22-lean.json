@@ -1,0 +1,162 @@
+{
+ "id": "PRO-22-lean",
+ "name": "Энергоаудит, ЛЁГКИЙ вариант: приборы в аренду вместо покупки",
+ "_обоснование": "Базовый вариант арифметически не помещается в $150 тыс.: капзатраты $80-250 тыс. плюс 5-13 месяцев до аккредитации съедают весь капитал до первой выручки. Лёгкий вариант: тепловизоры и анализаторы берутся в аренду под проект, аккредитация покупается через партнёрство с действующей лабораторией. Капзатраты падают, но постоянные расходы и себестоимость растут, а валовая маржа ниже.",
+ "common_factor_strength": 0.15,
+ "market": {
+  "tam_customers": [
+   317,
+   550,
+   900
+  ],
+  "max_capture_rate": 0.05,
+  "winback_share": 0.9
+ },
+ "pricing": {
+  "arpu_month": [
+   3000,
+   5500,
+   9000
+  ],
+  "price_escalation_annual": 0.05
+ },
+ "funnel": {
+  "opps_per_rep_month": [
+   3.0,
+   6.0,
+   10.0
+  ],
+  "win_rate": [
+   0.12,
+   0.22,
+   0.35
+  ],
+  "cac0": [
+   800,
+   2000,
+   4500
+  ],
+  "cac_growth_annual": 0.15,
+  "cac_penetration_k": 1.0,
+  "start_reps": 0,
+  "max_reps": 4,
+  "founder_opps_month": [
+   1.0,
+   2.0,
+   3.5
+  ]
+ },
+ "churn": {
+  "monthly": [
+   0.15,
+   0.25,
+   0.35
+  ],
+  "drift_annual": 0.0
+ },
+ "delivery": {
+  "clients_per_fte": [
+   1.5,
+   2.5,
+   4.0
+  ],
+  "max_hires_per_month": 0.8,
+  "fte_cost_month": [
+   900,
+   1500,
+   2400
+  ],
+  "ramp_months": 2,
+  "start_fte": 1,
+  "max_fte": 22,
+  "founder_capacity_clients": [
+   0.5,
+   1.0,
+   1.5
+  ]
+ },
+ "costs": {
+  "fixed_opex_month": [
+   3500,
+   5500,
+   9000
+  ],
+  "gross_margin": [
+   0.32,
+   0.45,
+   0.58
+  ],
+  "mkt_budget_share_of_rev": 0.06,
+  "mkt_budget_floor": 900,
+  "startup_capex": [
+   20000,
+   38000,
+   65000
+  ]
+ },
+ "wc": {
+  "dso_days": [
+   40,
+   70,
+   110
+  ],
+  "dpo_days": 30,
+  "prepay_share": 0.3
+ },
+ "tax": {
+  "regime": "turnover",
+  "turnover_rate": 0.04,
+  "profit_rate": 0.15,
+  "vat_rate": 0.12,
+  "social_tax": 0.12,
+  "vat_passthrough_b2b": true,
+  "turnover_regime_cap_usd_year": 80000
+ },
+ "competition": {
+  "p_competitor_at_start": 0.6,
+  "entry_hazard_month": 0.035,
+  "price_impact": 0.2,
+  "churn_impact_abs": 0.01,
+  "winrate_impact": 0.3
+ },
+ "exit": {
+  "ebitda_multiple": [
+   2.0,
+   4.0,
+   6.5
+  ],
+  "prob_exit_market": 0.4,
+  "hold_multiple_factor": 0.55
+ },
+ "capital": {
+  "owner_capital": 150000,
+  "cash_buffer_months": 3,
+  "prefund_months": 2
+ },
+ "abandon": {
+  "check_month": 18,
+  "min_monthly_revenue": [
+   10000,
+   18000,
+   28000
+  ],
+  "salvage_share_of_wc": 0.8
+ },
+ "launch": {
+  "delay_months": [
+   3,
+   5,
+   8
+  ],
+  "p_fail_to_launch": 0.14,
+  "p_no_demand": 0.15,
+  "no_demand_winrate_factor": 0.15,
+  "no_demand_tam_factor": 0.25
+ },
+ "fx": {
+  "uzs_vs_usd_annual_drift": 0.0,
+  "annual_vol": 0.06,
+  "usd_revenue_share": 0.05,
+  "usd_cost_share": 0.25
+ }
+}
