@@ -1,0 +1,169 @@
+{
+ "id": "MED-12",
+ "name": "Контрактное производство одноразовых медизделий (на базе завода отца)",
+ "_обоснование": "Единственная идея, где полностью работает критерий «отраслевой доступ через семью»: завод шприцев и инфузионных систем уже существует, лицензия и площадка есть. Его $150 тыс. идут в оборотный капитал и одну линию, а не в стройку с нуля. Продукт материальный -> завод продаётся, в отличие от личной практики. ОСТОРОЖНО: это ПРЕДПОЛОЖЕНИЕ, что отец пустит в дело на разумных условиях — не проверено и должно быть проверено разговором до любых вложений.",
+ "common_factor_strength": 0.25,
+ "market": {
+  "tam_customers": [
+   40,
+   90,
+   180
+  ],
+  "max_capture_rate": 0.04,
+  "winback_share": 0.7
+ },
+ "pricing": {
+  "arpu_month": [
+   4000,
+   9000,
+   18000
+  ],
+  "price_escalation_annual": 0.03
+ },
+ "funnel": {
+  "opps_per_rep_month": [
+   2.0,
+   4.0,
+   7.0
+  ],
+  "win_rate": [
+   0.12,
+   0.22,
+   0.35
+  ],
+  "cac0": [
+   1500,
+   4000,
+   9000
+  ],
+  "cac_growth_annual": 0.1,
+  "cac_penetration_k": 1.0,
+  "cac_growth_cap_years": 3.0,
+  "start_reps": 0,
+  "max_reps": 3,
+  "founder_opps_month": [
+   1.0,
+   2.0,
+   3.0
+  ]
+ },
+ "churn": {
+  "monthly": [
+   0.015,
+   0.03,
+   0.055
+  ],
+  "drift_annual": 0.0
+ },
+ "delivery": {
+  "clients_per_fte": [
+   3.0,
+   5.0,
+   8.0
+  ],
+  "max_hires_per_month": 0.7,
+  "fte_cost_month": [
+   700,
+   1200,
+   2000
+  ],
+  "ramp_months": 2,
+  "start_fte": 1,
+  "max_fte": 30,
+  "founder_capacity_clients": [
+   1.0,
+   2.0,
+   3.0
+  ]
+ },
+ "costs": {
+  "fixed_opex_month": [
+   3000,
+   5500,
+   9500
+  ],
+  "gross_margin": [
+   0.22,
+   0.33,
+   0.45
+  ],
+  "mkt_budget_share_of_rev": 0.03,
+  "mkt_budget_floor": 700,
+  "startup_capex": [
+   45000,
+   85000,
+   140000
+  ],
+  "cost_inflation_annual": 0.06
+ },
+ "wc": {
+  "dso_days": [
+   50,
+   85,
+   130
+  ],
+  "dpo_days": 45,
+  "prepay_share": 0.1
+ },
+ "tax": {
+  "regime": "turnover",
+  "turnover_rate": 0.04,
+  "profit_rate": 0.15,
+  "vat_rate": 0.12,
+  "social_tax": 0.12,
+  "vat_passthrough_b2b": true,
+  "turnover_regime_cap_usd_year": 80000
+ },
+ "competition": {
+  "p_competitor_at_start": 1.0,
+  "entry_hazard_month": 0.025,
+  "price_impact": 0.15,
+  "churn_impact_abs": 0.004,
+  "winrate_impact": 0.3
+ },
+ "exit": {
+  "ebitda_multiple": [
+   3.0,
+   5.0,
+   8.0
+  ],
+  "prob_exit_market": 0.45,
+  "hold_multiple_factor": 0.6
+ },
+ "capital": {
+  "owner_capital": 150000,
+  "cash_buffer_months": 3,
+  "prefund_months": 2,
+  "capex_recovery_share": 0.45,
+  "debt_share_of_capex": 0.6,
+  "debt_rate_annual": 0.18,
+  "debt_term_months": 60,
+  "debt_grace_months": 6
+ },
+ "abandon": {
+  "check_month": 20,
+  "min_monthly_revenue": [
+   8000,
+   15000,
+   25000
+  ],
+  "salvage_share_of_wc": 0.8
+ },
+ "launch": {
+  "delay_months": [
+   4,
+   7,
+   13
+  ],
+  "p_fail_to_launch": 0.12,
+  "p_no_demand": 0.18,
+  "no_demand_winrate_factor": 0.15,
+  "no_demand_tam_factor": 0.25
+ },
+ "fx": {
+  "uzs_vs_usd_annual_drift": -0.05,
+  "annual_vol": 0.08,
+  "usd_revenue_share": 0.05,
+  "usd_cost_share": 0.55
+ }
+}

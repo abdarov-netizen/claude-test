@@ -44,7 +44,8 @@
    1.5,
    2.5,
    4.0
-  ]
+  ],
+  "cac_growth_cap_years": 3.0
  },
  "churn": {
   "monthly": [
@@ -92,7 +93,8 @@
    8000,
    18000,
    35000
-  ]
+  ],
+  "cost_inflation_annual": 0.06
  },
  "wc": {
   "dso_days": [
@@ -109,7 +111,7 @@
   "profit_rate": 0.15,
   "vat_rate": 0.12,
   "social_tax": 0.12,
-  "vat_passthrough_b2b": true,
+  "vat_passthrough_b2b": false,
   "turnover_regime_cap_usd_year": 80000
  },
  "competition": {

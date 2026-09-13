@@ -152,13 +152,25 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
     first_rev_m = np.full(n, -1, dtype=int)
 
     # стартовые вложения (месяц 0): вносим деньги, СРАЗУ покупаем оборудование
-    inj = capex0 + fixed_op * float(ca.get("prefund_months", 2.0))
+    d_share_pre = float(ca.get("debt_share_of_capex", 0.0))
+    # владелец вносит ТОЛЬКО свою долю капзатрат: остальное даёт банк
+    inj = capex0 * (1.0 - d_share_pre) + fixed_op * float(ca.get("prefund_months", 2.0))
     inj = np.minimum(inj, owner_cap)
     cash += inj; injected += inj
     pv_flows += -inj
-    capex_spent = np.minimum(capex0, cash)      # нельзя купить больше, чем есть денег
-    cash -= capex_spent                          # деньги ушли в оборудование
-    capex_recov = float(ca.get("capex_recovery_share", 0.25))  # б/у продаётся с дисконтом
+    capex_recov = float(ca.get("capex_recovery_share", 0.25))
+    # Проектный долг под актив: оборудование и стройка финансируются не из кармана владельца.
+    d_share = float(ca.get("debt_share_of_capex", 0.0))
+    d_rate  = float(ca.get("debt_rate_annual", 0.18))
+    d_term  = int(ca.get("debt_term_months", 60))
+    debt0   = capex0 * d_share
+    cash += debt0                                 # банк выдал кредит
+    capex_spent = np.minimum(capex0, cash)
+    cash -= capex_spent                            # актив куплен
+    i_m = d_rate / 12.0
+    ann = (debt0 * i_m / (1 - (1 + i_m) ** (-d_term))) if d_term > 0 and d_share > 0 else np.zeros(n)
+    debt_bal = debt0.copy() if d_share > 0 else np.zeros(n)
+    grace = int(ca.get("debt_grace_months", 6))    # отсрочка тела на время стройки
 
     for t in range(1, months + 1):
         a = alive.copy()
@@ -180,10 +192,13 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
 
         # воронка с насыщением
         pen = np.clip(1.0 - pool / np.maximum(tam, 1e-9), 0, 1)
-        cac = cac0 * (1 + cac_growth) ** yrs * (1 + cac_pen_k * pen) * fx_eff_cost
+        cac = (cac0 * (1 + cac_growth) ** min(yrs, float(fn.get("cac_growth_cap_years", 3.0)))
+               * (1 + cac_pen_k * pen) * fx_eff_cost)
         wr = np.where(comp_in, win_rate * (1 - cp_win), win_rate)
 
-        mkt_budget = np.maximum(mkt_floor, mkt_share * (rev_hist[(t - 1) % 12] if t > 1 else 0.0))
+        prev_rev = rev_hist[(t - 1) % 12] if t > 1 else 0.0
+        mkt_budget = np.maximum(mkt_floor, mkt_share * prev_rev)
+        mkt_budget = np.minimum(mkt_budget, np.maximum(mkt_floor, 0.5 * np.maximum(cash, 0.0)))
         cap_capacity = (fte_sal * opps_rep + own_opps) * wr
         cap_budget = mkt_budget / np.maximum(cac, 1e-9)
         cap_market = pool * max_capt
@@ -206,10 +221,13 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
         # выручка и затраты
         revenue = np.where(a, clients * arpu, 0.0)
         cogs = revenue * (1 - gm)
-        payroll = (fte_del + fte_sal) * fte_cost * fx_eff_cost
+        cost_infl = (1.0 + float(co.get("cost_inflation_annual", 0.06))) ** yrs
+        payroll = (fte_del + fte_sal) * fte_cost * fx_eff_cost * cost_infl
         social = payroll * (0.0 if regime == "itpark" else social_tax)
-        opex = fixed_op * fx_eff_cost + payroll + social + mkt_budget + founder_salary_month
-        ebitda = revenue - cogs - opex
+        opex_cash = fixed_op * fx_eff_cost * cost_infl + payroll + social + mkt_budget
+        opex = opex_cash + founder_salary_month
+        ebitda = revenue - cogs - opex                    # экономический результат (с упущенной выгодой)
+        ebitda_tax = revenue - cogs - opex_cash - debt_bal * (d_rate / 12.0)  # проценты вычитаемы
 
         # налоги
         if regime == "turnover":
@@ -217,7 +235,7 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
             # выше порога компания обязана перейти на общий режим (прибыль + НДС + соцналог)
             run_rate = revenue * 12.0
             small = run_rate <= turn_cap
-            ebt_g = ebitda
+            ebt_g = ebitda_tax
             taxable_g = np.maximum(0.0, ebt_g - nol)
             nol = np.maximum(0.0, nol - np.maximum(0.0, ebt_g)) + np.maximum(0.0, -ebt_g)
             tax = np.where(small, turn_rate * revenue, prof_rate * taxable_g)
@@ -229,7 +247,7 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
             tax = np.zeros(n)
             vat_pay = np.zeros(n) if vat_neutral else np.maximum(0.0, vat_rate * (revenue - cogs * vat_input))
         else:
-            ebt = ebitda
+            ebt = ebitda_tax
             taxable = np.maximum(0.0, ebt - nol)
             nol = np.maximum(0.0, nol - np.maximum(0.0, ebt)) + np.maximum(0.0, -ebt)
             tax = prof_rate * taxable
@@ -243,11 +261,16 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
 
         # оборотный капитал
         ar_new = revenue * (1 - prepay) * dso / 30.0
-        ap_new = (cogs + opex) * dpo / 30.0
+        deferrable = cogs + mkt_budget + fixed_op * fx_eff_cost * cost_infl
+        ap_new = deferrable * dpo / 30.0
         d_wc = (ar_new - ar) - (ap_new - ap)
         ar, ap = ar_new, ap_new
 
-        cf = np.where(a, ebitda - tax - vat_pay - d_wc, 0.0)
+        interest = debt_bal * i_m
+        pay = np.where((t > grace) & (debt_bal > 1e-6), np.minimum(ann, debt_bal + interest), 0.0)
+        principal = np.maximum(0.0, pay - interest)
+        debt_bal = np.maximum(0.0, debt_bal - principal)
+        cf = np.where(a, ebitda - tax - vat_pay - d_wc - pay, 0.0)
 
         # найм (ограниченная скорость)
         headroom = np.where(deliver_binding & (clients > 0), cli_fte, 0.0)  # запас под воронку
@@ -272,7 +295,7 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
         # 1) неплатёжеспособность
         dead = a & (cash < -1e-6)
         if dead.any():
-            salv = np.maximum(0.0, ar * ab_salvage) + capex_spent * capex_recov * 0.6
+            salv = np.maximum(0.0, ar * ab_salvage + capex_spent * capex_recov * 0.6 - debt_bal)
             pv_flows += np.where(dead, salv / disc_m ** t, 0.0)
             alive &= ~dead; death_m = np.where(dead, t, death_m); death_kind = np.where(dead, 1, death_kind)
             a = alive.copy()
@@ -280,7 +303,7 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
         # 1б) провал запуска -> закрытие через 3 месяца после планового старта
         fl = a & fail_launch & (t >= delay + 3)
         if fl.any():
-            salv = np.maximum(0.0, cash + ar * ab_salvage) + capex_spent * capex_recov
+            salv = np.maximum(0.0, cash + ar * ab_salvage + capex_spent * capex_recov - debt_bal)
             pv_flows += np.where(fl, salv / disc_m ** t, 0.0)
             alive &= ~fl; death_m = np.where(fl, t, death_m); death_kind = np.where(fl, 3, death_kind)
             a = alive.copy()
@@ -290,7 +313,7 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
             ttm = rev_hist.sum(axis=0) / 12.0
             quit_ = a & (ttm < ab_minrev) & (ebitda < 0) & (t >= delay + 6)
             if quit_.any():
-                salv = np.maximum(0.0, cash + ar * ab_salvage) + capex_spent * capex_recov
+                salv = np.maximum(0.0, cash + ar * ab_salvage + capex_spent * capex_recov - debt_bal)
                 pv_flows += np.where(quit_, salv / disc_m ** t, 0.0)
                 alive &= ~quit_; death_m = np.where(quit_, t, death_m); death_kind = np.where(quit_, 2, death_kind)
                 a = alive.copy()
@@ -321,6 +344,7 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
     got_exit = rng.random(n) < p_exit
     eff_mult = np.where(got_exit, mult, mult * mult_hold)
     tv = np.where(alive & (ebitda_ttm > 0), ebitda_ttm * eff_mult, 0.0) + np.where(alive, cash, 0.0)
+    tv = np.maximum(0.0, tv - np.where(alive, debt_bal, 0.0))   # долг вычитается из цены выхода
     pv_flows += tv / disc_m ** months
 
     return dict(npv=pv_flows, alive=alive, fail_launch=fail_launch, no_demand=nodemand, delay=delay, injected=injected, ebitda_ttm=ebitda_ttm,

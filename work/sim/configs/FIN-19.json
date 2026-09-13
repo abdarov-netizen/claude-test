@@ -44,7 +44,8 @@
    1.0,
    2.0,
    3.0
-  ]
+  ],
+  "cac_growth_cap_years": 3.0
  },
  "churn": {
   "monthly": [
@@ -92,7 +93,8 @@
    15000,
    35000,
    70000
-  ]
+  ],
+  "cost_inflation_annual": 0.06
  },
  "wc": {
   "dso_days": [
