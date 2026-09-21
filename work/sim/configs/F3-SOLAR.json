@@ -1,0 +1,171 @@
+{
+ "id": "F3-SOLAR",
+ "name": "C&I солнце «за забором» плюс накопители по PPA (AST-22 + IND-01)",
+ "_обоснование": "Ярус 3 места 3-4 (обе 7.08), объединены: это одна бизнес-модель. ФАКТЫ: лицензия НЕ нужна для генерации до 5 МВт, станции в замысле 0.5-3 МВт; тарифы по звеньям впервые раскрыты 08.08.2026, экономика PPA стала считаемой; 4 000 аварий в сетях за июнь-июль как продающий аргумент. ПРОТИВ: 20+ локальных EPC, JinkoSolar подписала на Power Uzbekistan 2026 рамочные соглашения на 1 ГВт с четырьмя местными дистрибьюторами; сильнейший заменитель — при дешёвой панели и льготном кредите предприятию проще купить станцию себе. Капиталоёмко, но проектный долг доступен через зелёные линии ЕБРР/АБР. Выручка PPA законтрактована на 10-15 лет — отсюда низкий отток. | СТРУКТУРНАЯ ПОПРАВКА: Один объект 1.5-2 МВт (или портфель, построенный сразу) с 2-4 якорными офтейкерами. Контракты PPA подписываются ДО стройки — иначе банк не даст проектный долг. Поэтому высокий win_rate: это не массовая воронка, а переговоры с несколькими промышленными потребителями.",
+ "common_factor_strength": 0.15,
+ "market": {
+  "tam_customers": [
+   2,
+   4,
+   7
+  ],
+  "max_capture_rate": 0.35,
+  "winback_share": 0.3
+ },
+ "pricing": {
+  "arpu_month": [
+   9000,
+   17000,
+   30000
+  ],
+  "price_escalation_annual": 0.03
+ },
+ "funnel": {
+  "opps_per_rep_month": [
+   2.0,
+   4.0,
+   7.0
+  ],
+  "win_rate": [
+   0.3,
+   0.45,
+   0.62
+  ],
+  "cac0": [
+   3000,
+   7000,
+   15000
+  ],
+  "cac_growth_annual": 0.12,
+  "cac_penetration_k": 1.2,
+  "start_reps": 0,
+  "max_reps": 3,
+  "founder_opps_month": [
+   1.5,
+   2.5,
+   4.0
+  ],
+  "cac_growth_cap_years": 3.0
+ },
+ "churn": {
+  "monthly": [
+   0.002,
+   0.005,
+   0.012
+  ],
+  "drift_annual": 0.0
+ },
+ "delivery": {
+  "clients_per_fte": [
+   2.5,
+   4.5,
+   7.0
+  ],
+  "max_hires_per_month": 1.0,
+  "fte_cost_month": [
+   1200,
+   2000,
+   3200
+  ],
+  "ramp_months": 3,
+  "start_fte": 0,
+  "max_fte": 14,
+  "founder_capacity_clients": [
+   2.0,
+   3.0,
+   5.0
+  ]
+ },
+ "costs": {
+  "fixed_opex_month": [
+   2500,
+   4500,
+   8000
+  ],
+  "gross_margin": [
+   0.55,
+   0.7,
+   0.82
+  ],
+  "mkt_budget_share_of_rev": 0.06,
+  "mkt_budget_floor": 600,
+  "startup_capex": [
+   700000,
+   1400000,
+   2500000
+  ],
+  "cost_inflation_annual": 0.06
+ },
+ "wc": {
+  "dso_days": [
+   30,
+   45,
+   70
+  ],
+  "dpo_days": 45,
+  "prepay_share": 0.1
+ },
+ "tax": {
+  "regime": "general",
+  "turnover_rate": 0.04,
+  "profit_rate": 0.15,
+  "vat_rate": 0.12,
+  "social_tax": 0.12,
+  "vat_passthrough_b2b": true,
+  "turnover_regime_cap_usd_year": 80000
+ },
+ "competition": {
+  "p_competitor_at_start": 0.8,
+  "entry_hazard_month": 0.03,
+  "price_impact": 0.12,
+  "churn_impact_abs": 0.004,
+  "winrate_impact": 0.3
+ },
+ "exit": {
+  "ebitda_multiple": [
+   6.0,
+   9.0,
+   13.0
+  ],
+  "prob_exit_market": 0.6,
+  "hold_multiple_factor": 0.8
+ },
+ "capital": {
+  "owner_capital": 150000,
+  "cash_buffer_months": 3,
+  "prefund_months": 15,
+  "capex_recovery_share": 0.55,
+  "debt_share_of_capex": 0.7,
+  "debt_rate_annual": 0.16,
+  "debt_term_months": 84,
+  "debt_grace_months": 15,
+  "equity_mode": "dilute_to_fit",
+  "dsra_months": 6
+ },
+ "abandon": {
+  "check_month": 30,
+  "min_monthly_revenue": [
+   8000,
+   16000,
+   28000
+  ],
+  "salvage_share_of_wc": 0.8
+ },
+ "launch": {
+  "delay_months": [
+   7,
+   12,
+   20
+  ],
+  "p_fail_to_launch": 0.2,
+  "p_no_demand": 0.25,
+  "no_demand_winrate_factor": 0.2,
+  "no_demand_tam_factor": 0.3
+ },
+ "fx": {
+  "uzs_vs_usd_annual_drift": -0.05,
+  "annual_vol": 0.08,
+  "usd_revenue_share": 0.1,
+  "usd_cost_share": 0.25
+ }
+}

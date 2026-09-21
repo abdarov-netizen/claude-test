@@ -99,6 +99,15 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
     mult_hold  = float(ex.get("hold_multiple_factor", 0.55))
 
     owner_cap  = float(ca.get("owner_capital", 150000.0))
+    # ИСПРАВЛЕНИЕ 10: соинвестор в КАПИТАЛЕ. Заказчик прямо сказал, что умеет привлекать
+    # партнёров, поэтому проект дороже $150 тыс. не должен умирать механически. Партнёр
+    # вносит свою долю собственного капитала и забирает такую же долю выхода.
+    # Режим "dilute_to_fit": проект финансируется ПОЛНОСТЬЮ, а доля заказчика — это то,
+    # что покупают его $150 тыс. Так он не недофинансирует проект, а размывается. Именно
+    # так и работает привлечение соинвестора, о котором он сказал прямо.
+    eq_mode    = ca.get("equity_mode", "fixed_share")
+    partner_sh = float(np.clip(ca.get("equity_partner_share", 0.0), 0.0, 0.95))
+    own_sh     = np.full(n, 1.0 - partner_sh)
     cash_buf_m = float(ca.get("cash_buffer_months", 3.0))
 
     ab_month   = int(ab.get("check_month", 18))
@@ -154,21 +163,39 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
     # стартовые вложения (месяц 0): вносим деньги, СРАЗУ покупаем оборудование
     d_share_pre = float(ca.get("debt_share_of_capex", 0.0))
     # владелец вносит ТОЛЬКО свою долю капзатрат: остальное даёт банк
-    inj = capex0 * (1.0 - d_share_pre) + fixed_op * float(ca.get("prefund_months", 2.0))
-    inj = np.minimum(inj, owner_cap)
-    cash += inj; injected += inj
-    pv_flows += -inj
+    eq_need = capex0 * (1.0 - d_share_pre) + fixed_op * float(ca.get("prefund_months", 2.0))
+    if eq_mode == "dilute_to_fit":
+        # заказчик вносит сколько может, доля = его взнос / вся потребность в капитале
+        own_inj = np.minimum(eq_need, owner_cap)
+        own_sh  = np.where(eq_need > 1e-9, own_inj / np.maximum(eq_need, 1e-9), 1.0)
+        inj     = eq_need                       # проект профинансирован полностью
+    else:
+        own_inj = np.minimum(eq_need * own_sh, owner_cap)
+        inj     = np.where(own_sh > 1e-9, own_inj / np.maximum(own_sh, 1e-9), own_inj)
+    cash += inj; injected += own_inj
+    pv_flows += -own_inj
     capex_recov = float(ca.get("capex_recovery_share", 0.25))
     # Проектный долг под актив: оборудование и стройка финансируются не из кармана владельца.
     d_share = float(ca.get("debt_share_of_capex", 0.0))
     d_rate  = float(ca.get("debt_rate_annual", 0.18))
     d_term  = int(ca.get("debt_term_months", 60))
-    debt0   = capex0 * d_share
-    cash += debt0                                 # банк выдал кредит
-    capex_spent = np.minimum(capex0, cash)
-    cash -= capex_spent                            # актив куплен
     i_m = d_rate / 12.0
-    ann = (debt0 * i_m / (1 - (1 + i_m) ** (-d_term))) if d_term > 0 and d_share > 0 else np.zeros(n)
+    debt0   = capex0 * d_share
+    # ИСПРАВЛЕНИЕ 11: РЕЗЕРВ НА ОБСЛУЖИВАНИЕ ДОЛГА (DSRA). В проектном финансировании
+    # резерв на 6 месяцев платежей формируется ПРИ ЗАКРЫТИИ СДЕЛКИ и финансируется самой
+    # кредитной линией, а не из кармана спонсора. Без него модель заставляла заказчика
+    # платить аннуитет $24 тыс./мес из префанда на операционные расходы — и проект умирал
+    # на стройке, хотя в реальности так сделки просто не структурируют.
+    dsra_m  = float(ca.get("dsra_months", 0.0))
+    if d_term > 0 and d_share > 0:
+        ann0 = debt0 * i_m / (1 - (1 + i_m) ** (-d_term))
+        debt0 = debt0 + dsra_m * ann0             # резерв входит в тело кредита
+        ann = debt0 * i_m / (1 - (1 + i_m) ** (-d_term))
+    else:
+        ann = np.zeros(n)
+    cash += debt0                                 # банк выдал кредит вместе с резервом
+    capex_spent = np.minimum(capex0, cash)
+    cash -= capex_spent                            # актив куплен, резерв остался в кассе
     debt_bal = debt0.copy() if d_share > 0 else np.zeros(n)
     grace = int(ca.get("debt_grace_months", 6))    # отсрочка тела на время стройки
 
@@ -285,18 +312,19 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
         cash = cash + cf
 
         # докапитализация из лимита основателя
-        room = np.maximum(0.0, owner_cap - injected)
+        room = np.maximum(0.0, owner_cap - injected)          # остаток кармана владельца
         need = np.where(a & (cash < 0), -cash, 0.0)
-        add = np.minimum(need, room)
-        cash += add; injected += add
-        pv_flows += -add / disc_m ** t
+        own_add = np.minimum(need * own_sh, room)
+        add = np.where(own_sh > 1e-9, own_add / np.maximum(own_sh, 1e-9), own_add)
+        cash += add; injected += own_add
+        pv_flows += -own_add / disc_m ** t
         peak_need = np.maximum(peak_need, injected)
 
         # 1) неплатёжеспособность
         dead = a & (cash < -1e-6)
         if dead.any():
             salv = np.maximum(0.0, ar * ab_salvage + capex_spent * capex_recov * 0.6 - debt_bal)
-            pv_flows += np.where(dead, salv / disc_m ** t, 0.0)
+            pv_flows += np.where(dead, own_sh * salv / disc_m ** t, 0.0)
             alive &= ~dead; death_m = np.where(dead, t, death_m); death_kind = np.where(dead, 1, death_kind)
             a = alive.copy()
 
@@ -304,7 +332,7 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
         fl = a & fail_launch & (t >= delay + 3)
         if fl.any():
             salv = np.maximum(0.0, cash + ar * ab_salvage + capex_spent * capex_recov - debt_bal)
-            pv_flows += np.where(fl, salv / disc_m ** t, 0.0)
+            pv_flows += np.where(fl, own_sh * salv / disc_m ** t, 0.0)
             alive &= ~fl; death_m = np.where(fl, t, death_m); death_kind = np.where(fl, 3, death_kind)
             a = alive.copy()
 
@@ -314,15 +342,25 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
             quit_ = a & (ttm < ab_minrev) & (ebitda < 0) & (t >= delay + 6)
             if quit_.any():
                 salv = np.maximum(0.0, cash + ar * ab_salvage + capex_spent * capex_recov - debt_bal)
-                pv_flows += np.where(quit_, salv / disc_m ** t, 0.0)
+                pv_flows += np.where(quit_, own_sh * salv / disc_m ** t, 0.0)
                 alive &= ~quit_; death_m = np.where(quit_, t, death_m); death_kind = np.where(quit_, 2, death_kind)
                 a = alive.copy()
 
         # распределение избытка денег владельцу
+        # ИСПРАВЛЕНИЕ 12: нельзя раздавать деньги, ЕЩЁ НЕ ПОТРАЧЕННЫЕ НА СТРОЙКУ И РЕЗЕРВ.
+        # Раньше буфер считался как 3 месяца ТЕКУЩИХ расходов, а у стройки до запуска
+        # расходы копеечные — поэтому весь капитал стройки и резерв на обслуживание долга
+        # выплачивались владельцу дивидендом в первый же месяц, и проект умирал, не начав
+        # строиться. Это и давало 0% выживаемости у всех капиталоёмких идей.
+        # Теперь: до запуска и до конца отсрочки по телу долга распределений нет вообще,
+        # а резерв на обслуживание долга удерживается, пока долг не погашен.
         buf = cash_buf_m * (opex + cogs)
-        dist = np.where(a & (cash > buf), cash - buf, 0.0)
+        dsra_hold = np.where(debt_bal > 1e-6, dsra_m * ann, 0.0)
+        buf_eff = np.maximum(buf, dsra_hold)
+        can_dist = a & (t > delay) & (t > grace)
+        dist = np.where(can_dist & (cash > buf_eff), cash - buf_eff, 0.0)
         cash -= dist
-        pv_flows += dist / disc_m ** t
+        pv_flows += own_sh * dist / disc_m ** t
 
         if rec:
             path["revenue"][t] = np.where(a, revenue, 0.0)
@@ -345,7 +383,7 @@ def simulate(cfg, n=20000, months=60, seed=7, founder_salary_month=0.0,
     eff_mult = np.where(got_exit, mult, mult * mult_hold)
     tv = np.where(alive & (ebitda_ttm > 0), ebitda_ttm * eff_mult, 0.0) + np.where(alive, cash, 0.0)
     tv = np.maximum(0.0, tv - np.where(alive, debt_bal, 0.0))   # долг вычитается из цены выхода
-    pv_flows += tv / disc_m ** months
+    pv_flows += own_sh * tv / disc_m ** months
 
     return dict(npv=pv_flows, alive=alive, fail_launch=fail_launch, no_demand=nodemand, delay=delay, injected=injected, ebitda_ttm=ebitda_ttm,
                 rev_ttm=rev_hist.sum(axis=0), tv=tv, death_month=death_m, death_kind=death_kind,
