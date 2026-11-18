@@ -4,19 +4,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Caveat:wght@500;600&family=Amiri:wght@400;700&display=swap">
 <style>
-/* Layout: one night-sky stage; a single paper book page floats in its centre and turns like a real leaf.
+/* Layout: a real night sky (Milky Way, slow celestial drift, city silhouette with domes and minarets);
+   a single paper leaf floats in front of it and turns like a book page.
    Deliberately one visual world (night + paper), so no light/dark split. */
 :root{
-  --night:#0b1029;        /* sky ground */
-  --night-2:#18204a;      /* horizon glow */
-  --gold:#d9b76e;         /* lattice, rules, star */
+  --night:#04060f;
+  --night-2:#121a3f;
+  --gold:#d9b76e;
   --gold-soft:#d9b76e33;
-  --paper:#f7f0e3;        /* book leaf */
+  --paper:#f7f0e3;
   --paper-edge:#e9dcc4;
-  --ink:#2a2233;          /* text on paper */
+  --ink:#2a2233;
   --ink-soft:#6c6170;
-  --clay:#b8714f;         /* pottery accent, used once at the end */
-  --sage:#8fa38a;         /* cotton leaves */
+  --clay:#b8714f;
+  --sage:#7f9a7a;
   --f-display:"Cormorant Garamond", "Iowan Old Style", Georgia, serif;
   --f-body:"EB Garamond", Georgia, "Times New Roman", serif;
   --f-hand:"Caveat", "Segoe Print", "Bradley Hand", cursive;
@@ -25,14 +26,13 @@
 }
 html,body{height:100%}
 body{
-  background:radial-gradient(120% 80% at 50% 110%, var(--night-2), var(--night) 60%);
+  background:linear-gradient(to bottom, #02030a 0%, #060a1d 45%, #0e1536 78%, #1d2148 100%);
   background-color:var(--night);
   color:var(--paper);
   font-family:var(--f-body);
   overflow:hidden;
 }
 #sky{position:fixed;inset:0;width:100%;height:100%;display:block}
-.lattice{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:.09}
 
 /* ---------- Intro ---------- */
 .intro{
@@ -44,11 +44,10 @@ body{
 }
 .intro.gone{opacity:0;transform:scale(1.04);pointer-events:none}
 .arch{
-  position:relative;width:min(340px, 86vw);padding:56px 28px 40px;
+  position:relative;box-sizing:border-box;width:min(340px, 100%);padding:56px 28px 40px;
   border:1px solid var(--gold-soft);border-radius:999px 999px 18px 18px;
   display:grid;gap:14px;justify-items:center;
-  background:linear-gradient(#0b102966, #0b1029aa);
-  backdrop-filter:blur(2px);
+  background:radial-gradient(120% 90% at 50% 30%, #04060f55, #04060fb0);
 }
 .arch::before{content:"";position:absolute;inset:8px;border:1px solid #d9b76e1f;border-radius:999px 999px 12px 12px;pointer-events:none}
 .eyebrow{font-family:var(--f-display);letter-spacing:.32em;text-transform:uppercase;font-size:12px;color:var(--gold)}
@@ -60,23 +59,23 @@ body{
   position:fixed;width:64px;height:64px;margin:-32px 0 0 -32px;border:0;padding:0;background:none;cursor:pointer;
   border-radius:50%;z-index:3;
 }
-.star-btn svg{width:100%;height:100%;filter:drop-shadow(0 0 10px #fff3c8) drop-shadow(0 0 22px #d9b76e99);animation:pulse 2.6s ease-in-out infinite}
+.star-btn svg{width:100%;height:100%;filter:drop-shadow(0 0 8px #fff3c8) drop-shadow(0 0 20px #d9b76e88);animation:pulse 2.6s ease-in-out infinite}
 .star-btn:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
 .star-btn.gone{opacity:0;pointer-events:none;transition:opacity .8s}
-@keyframes pulse{0%,100%{transform:scale(.85) rotate(0deg)}50%{transform:scale(1.08) rotate(22.5deg)}}
+@keyframes pulse{0%,100%{transform:scale(.8)}50%{transform:scale(1.05)}}
 
 /* ---------- Book ---------- */
 .stage{
   position:fixed;inset:0;display:grid;grid-template-rows:1fr auto;align-items:center;justify-items:center;
   padding-left:max(16px, env(safe-area-inset-left, 0px));
   padding-right:max(16px, env(safe-area-inset-right, 0px));
-  padding-block:20px 14px;gap:12px;
+  padding-block:calc(58px + env(safe-area-inset-top, 0px)) 14px;gap:12px;
   opacity:0;pointer-events:none;transition:opacity 1.4s ease .4s;
 }
 .stage.on{opacity:1;pointer-events:auto}
-.book{perspective:1800px;width:min(480px, 100%);height:100%;max-height:760px;display:grid;align-items:center}
+.book{perspective:1800px;width:min(480px, 100%);height:100%;max-height:780px;display:grid;align-items:center;min-height:0}
 .leaf{
-  position:relative;height:100%;max-height:760px;overflow:hidden auto;
+  position:relative;height:100%;max-height:780px;overflow:hidden auto;
   background:
     radial-gradient(130% 90% at 0% 0%, #fffaf0 0%, transparent 55%),
     linear-gradient(90deg, #00000014 0, transparent 14px),
@@ -106,11 +105,13 @@ body{
 .rule{display:flex;align-items:center;gap:10px;color:#b8955a;justify-content:center}
 .rule::before,.rule::after{content:"";height:1px;width:64px;background:currentColor;opacity:.5}
 .page p{font-size:18px;line-height:1.6;margin:0;max-width:62ch}
+.page p.lead::first-letter{font-family:var(--f-display);font-size:3.1em;float:left;line-height:.8;padding:6px 8px 0 0;color:#8a5a3a}
 .note{font-family:var(--f-hand);font-size:24px;line-height:1.25;color:#7b4f3a}
+.page p.note{font-size:24px;line-height:1.25}
 
-/* Photo frame: an arch, like a window in a courtyard */
+/* Photo frame: an arch, like a courtyard window */
 .photo{
-  align-self:center;width:min(300px, 88%);aspect-ratio:3/4;max-width:100%;
+  align-self:center;width:min(300px, 88%);aspect-ratio:3/4;max-width:100%;flex:none;
   border-radius:999px 999px 6px 6px;overflow:hidden;position:relative;
   border:6px solid #fffaf2;box-shadow:0 0 0 1px #c9a86a, 0 14px 28px -14px #3b2a1a88;
   background:repeating-linear-gradient(45deg, #efe3cd 0 10px, #f3e9d6 10px 20px);
@@ -120,13 +121,6 @@ body{
 .photo .ph{font-family:var(--f-hand);font-size:20px;color:#9a8466;text-align:center;padding:24px}
 .photo.wide{aspect-ratio:4/3;border-radius:120px 120px 6px 6px;width:min(360px, 96%)}
 
-/* Draft markers: visible only while the skeleton is being filled */
-.todo{
-  border:1.5px dashed #c79b5b;border-radius:10px;padding:12px 14px;background:#fff8ea;
-  font-family:var(--f-body);font-style:italic;font-size:16px;line-height:1.45;color:#8a6a3c;
-}
-.todo b{font-style:normal;font-family:var(--f-display);letter-spacing:.14em;text-transform:uppercase;font-size:11px;display:block;margin-bottom:4px}
-
 /* Cover */
 .cover{justify-content:center;text-align:center;align-items:center;gap:22px}
 .bismillah{font-family:var(--f-arabic);font-size:28px;color:#8a6a3c;direction:rtl}
@@ -134,15 +128,53 @@ body{
 .names .amp{display:block;font-size:.55em;color:#b8955a;margin:6px 0}
 .date{font-family:var(--f-display);letter-spacing:.3em;font-size:13px;text-transform:uppercase;color:var(--ink-soft)}
 
-/* Ayah */
+/* Arabic */
 .ayah{font-family:var(--f-arabic);direction:rtl;font-size:clamp(22px, 5.6vw, 27px);line-height:2;text-align:center;color:#3c2c22}
-.ayah-en{font-style:italic;text-align:center;color:var(--ink-soft)}
+.page p.ayah-en{font-style:italic;text-align:center;color:var(--ink-soft)}
 .ref{text-align:center;font-family:var(--f-display);letter-spacing:.2em;font-size:12px;text-transform:uppercase;color:#9a7a3f}
+.son{display:grid;justify-items:center;gap:4px;padding:18px 0 6px}
+.son .ar{font-family:var(--f-arabic);font-size:clamp(44px, 12vw, 58px);line-height:1.3;color:#6d4a2c;direction:rtl;text-shadow:0 0 18px #e8c98a88}
+.son .en{font-family:var(--f-display);letter-spacing:.3em;text-transform:uppercase;font-size:13px;color:#9a7a3f}
+.crescent{width:40px;height:40px}
+
+/* Crash animation */
+.crash{display:grid;justify-items:center;gap:4px}
+.crash svg{width:min(340px, 100%);height:auto;overflow:visible}
+.c-mine{animation:mine 3.4s ease-out .5s both}
+@keyframes mine{0%{transform:translateX(-170px)}35%,52%{transform:translateX(0)}55%{transform:translateX(-7px)}58%{transform:translateX(3px)}61%{transform:translateX(-2px)}64%,100%{transform:translateX(0)}}
+.c-other{animation:other 3.4s ease-in .5s both}
+@keyframes other{0%,35%{transform:translateX(230px)}52%{transform:translateX(0)}60%,100%{transform:translateX(16px)}}
+.c-bonk{transform-box:fill-box;transform-origin:center;animation:bonk 3.4s .5s both}
+@keyframes bonk{0%,51%{opacity:0;transform:scale(.2)}55%{opacity:1;transform:scale(1.2)}62%,82%{opacity:1;transform:scale(1)}92%,100%{opacity:0;transform:scale(1)}}
+.c-dent{opacity:0;animation:appear .1s 2.3s forwards}
+.c-smoke{opacity:0;transform-box:fill-box;transform-origin:center;animation:smoke 2.2s ease-out 2.4s infinite}
+.c-smoke.s2{animation-delay:3s}.c-smoke.s3{animation-delay:3.6s}
+@keyframes smoke{0%{opacity:.55;transform:translate(0,0) scale(.6)}100%{opacity:0;transform:translate(6px,-30px) scale(1.6)}}
+.c-heart{opacity:0;transform-box:fill-box;transform-origin:center;animation:heart 1s 3.6s both}
+@keyframes heart{0%{opacity:0;transform:translateY(10px) scale(.4)}60%{opacity:1;transform:translateY(-4px) scale(1.15)}100%{opacity:1;transform:none}}
+@keyframes appear{to{opacity:1}}
+.replay{border:0;background:none;font-family:var(--f-hand);font-size:19px;color:#9a7a3f;cursor:pointer;padding:4px 8px}
+
+/* Quiz */
+.quiz{border:1px solid #d8c29a;border-radius:12px;padding:16px;background:#fffaf1;display:grid;gap:10px}
+.quiz .qk{font-family:var(--f-display);letter-spacing:.24em;text-transform:uppercase;font-size:11px;color:#9a7a3f}
+.quiz .qq{font-family:var(--f-display);font-size:22px;font-weight:600;line-height:1.2;color:#3a2a22}
+.opts{display:grid;gap:8px}
+.opt{
+  text-align:left;border:1px solid #dcc9a6;background:var(--paper);color:var(--ink);border-radius:10px;
+  padding:10px 14px;font-family:var(--f-body);font-size:17px;cursor:pointer;
+}
+.opt:hover{background:#f3e6cc}
+.opt.right{background:#dfe8d6;border-color:#8fa38a}
+.opt.wrong{animation:nope .4s}
+@keyframes nope{25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.qr{font-family:var(--f-hand);font-size:22px;line-height:1.25;color:#7b4f3a;min-height:1.25em}
+.qr.ok{color:#4f6b4a}
 
 /* Numbers */
-.stats{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:12px}
-.stat{border:1px solid #d8c29a;border-radius:10px;padding:14px 12px;text-align:center;background:#fffaf1}
-.stat .n{font-family:var(--f-display);font-size:36px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;color:#4a3426}
+.stats{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:10px}
+.stat{border:1px solid #d8c29a;border-radius:10px;padding:14px 10px;text-align:center;background:#fffaf1}
+.stat .n{font-family:var(--f-display);font-size:34px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;color:#4a3426}
 .stat .l{font-size:14px;color:var(--ink-soft);margin-top:6px;line-height:1.3}
 
 /* Pottery */
@@ -150,9 +182,9 @@ body{
 .wheel-wrap svg{width:min(240px, 70%);height:auto}
 .vase{transform-origin:120px 150px;animation:shape 4s ease-in-out infinite}
 @keyframes shape{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.9) scaleY(1.04)}}
-.spin{animation:spin 1.2s linear infinite;transform-origin:120px 168px}
+.spin{animation:spin 1.2s linear infinite}
 @keyframes spin{to{transform:translateX(-24px)}}
-.reveal{font-family:var(--f-display);font-style:italic;font-size:26px;text-align:center;color:var(--clay);margin:0;text-wrap:balance}
+.page p.reveal{font-family:var(--f-display);font-style:italic;font-size:24px;line-height:1.3;text-align:center;color:var(--clay);text-wrap:balance}
 
 /* Calendar */
 .cal{border:1px solid #d8c29a;border-radius:12px;padding:12px;background:#fffaf1}
@@ -172,47 +204,46 @@ body{
   background:var(--clay);color:#fff8ef;cursor:pointer;align-self:center;box-shadow:0 10px 20px -10px #8a4a2c;
 }
 .cta:disabled{background:#d9c3b0;box-shadow:none;cursor:default}
-.done{text-align:center;display:grid;gap:10px}
+.done{text-align:center;display:grid;gap:12px;justify-items:center}
 .done .big{font-family:var(--f-display);font-style:italic;font-size:30px;margin:0;color:#4a3426}
+.link-btn{border:0;background:none;font-family:var(--f-hand);font-size:19px;color:#9a7a3f;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* Envelope */
+.env{position:relative;width:220px;max-width:100%;aspect-ratio:3/2;border:0;padding:0;cursor:pointer;background:none;perspective:600px;margin-top:6px}
+.env .body{position:absolute;inset:0;background:#e6cfa6;border-radius:6px;box-shadow:0 12px 24px -12px #5a3a1a88}
+.env .body::after{content:"";position:absolute;inset:0;border-radius:6px;background:linear-gradient(to top right, transparent 49.5%, #d7bb8c 50%, transparent 50.5%), linear-gradient(to top left, transparent 49.5%, #d7bb8c 50%, transparent 50.5%)}
+.env .flap{position:absolute;left:0;right:0;top:0;height:62%;background:#dcc192;clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform .7s ease;z-index:2}
+.env .seal{position:absolute;left:50%;top:52%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:var(--clay);z-index:3;display:grid;place-items:center;color:#fff3e2;font-size:16px;transition:opacity .3s}
+.env.open .flap{transform:rotateX(180deg);z-index:0}
+.env.open .seal{opacity:0}
+.env-label{font-family:var(--f-hand);font-size:21px;color:#7b4f3a}
+.ps{border:1px solid #d8c29a;border-radius:10px;background:#fffdf7;padding:16px 18px;max-width:320px;animation:rise .7s ease both}
+.ps p{font-size:18px}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 
 /* Controls under the book */
 .controls{display:flex;align-items:center;gap:14px;width:min(480px, 100%);justify-content:space-between}
 .nav-btn{
-  border:1px solid var(--gold-soft);background:#0b102988;color:var(--gold);border-radius:999px;
-  height:44px;min-width:44px;padding:0 16px;font-family:var(--f-display);font-size:17px;cursor:pointer;
+  border:1px solid var(--gold-soft);background:#04060f99;color:var(--gold);border-radius:999px;
+  height:44px;min-width:44px;padding:0 16px;font-family:var(--f-display);font-size:20px;cursor:pointer;
 }
 .nav-btn:disabled{opacity:.25;cursor:default}
-.nav-btn:focus-visible,.cta:focus-visible,.day:focus-visible,.cal-nav:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+:is(.nav-btn,.cta,.day,.cal-nav,.opt,.env,.replay,.link-btn):focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;min-width:0}
 .dots i{width:6px;height:6px;border-radius:50%;background:#d9b76e44}
 .dots i.on{background:var(--gold)}
 .sound{
   position:fixed;z-index:5;top:calc(12px + env(safe-area-inset-top, 0px));right:max(12px, env(safe-area-inset-right, 0px));
-  border:1px solid var(--gold-soft);background:#0b102988;color:var(--gold);border-radius:999px;height:36px;padding:0 14px;
+  border:1px solid var(--gold-soft);background:#04060f99;color:var(--gold);border-radius:999px;height:36px;padding:0 14px;
   font-family:var(--f-display);font-size:15px;cursor:pointer;
 }
 
 @media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition:none!important}
 }
 </style>
 
 <canvas id="sky" aria-hidden="true"></canvas>
-
-<!-- Eight-point star lattice (khatam), drawn once and tiled -->
-<svg class="lattice" aria-hidden="true">
-  <defs>
-    <pattern id="khatam" width="80" height="80" patternUnits="userSpaceOnUse">
-      <g fill="none" stroke="#d9b76e" stroke-width="1">
-        <rect x="22" y="22" width="36" height="36"/>
-        <rect x="22" y="22" width="36" height="36" transform="rotate(45 40 40)"/>
-        <path d="M0 40 H14 M66 40 H80 M40 0 V14 M40 66 V80"/>
-        <circle cx="0" cy="0" r="6"/><circle cx="80" cy="0" r="6"/><circle cx="0" cy="80" r="6"/><circle cx="80" cy="80" r="6"/>
-      </g>
-    </pattern>
-  </defs>
-  <rect width="100%" height="100%" fill="url(#khatam)"/>
-</svg>
 
 <button class="sound" id="sound" hidden aria-pressed="false">♪ Sound off</button>
 
@@ -227,11 +258,10 @@ body{
 
 <button class="star-btn" id="star" aria-label="Open our book">
   <svg viewBox="0 0 64 64" aria-hidden="true">
-    <g fill="#fff6d8">
-      <rect x="20" y="20" width="24" height="24"/>
-      <rect x="20" y="20" width="24" height="24" transform="rotate(45 32 32)"/>
-    </g>
-    <circle cx="32" cy="32" r="6" fill="#ffffff"/>
+    <defs><radialGradient id="sg"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#fff4d6"/><stop offset="1" stop-color="#fff4d6" stop-opacity="0"/></radialGradient></defs>
+    <circle cx="32" cy="32" r="18" fill="url(#sg)"/>
+    <path d="M32 4 L33.2 30.8 L60 32 L33.2 33.2 L32 60 L30.8 33.2 L4 32 L30.8 30.8 Z" fill="#fffaf0" opacity=".9"/>
+    <circle cx="32" cy="32" r="4" fill="#ffffff"/>
   </svg>
 </button>
 
@@ -246,30 +276,63 @@ body{
 
 <script>
 /* =========================================================
-   CONTENT — everything to fill in lives here.
-   photo: "" shows a placeholder; later becomes "photos/xyz.jpg"
-   todo:  a dashed hint for Abdullah; delete once text is written
+   CONTENT
+   photo("", label) shows a placeholder; later becomes photo("photos/xyz.jpg", label)
    ========================================================= */
-const NIKAH = new Date(2024, 10, 19); // 19 Nov 2024
+const NIKAH = new Date(2024, 10, 19);
 
 const CORNER = `<svg class="corner CLS" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#b8955a" stroke-width="1"><path d="M4 60 V4 H60"/><path d="M10 54 V10 H54" opacity=".6"/></g><g fill="#8fa38a"><ellipse cx="20" cy="18" rx="6" ry="2.6" transform="rotate(-35 20 18)"/></g><circle cx="15" cy="13" r="5" fill="#fffdf8" stroke="#e3d6bd"/><circle cx="19" cy="11" r="4" fill="#fffdf8" stroke="#e3d6bd"/><circle cx="13" cy="17" r="4" fill="#fffdf8" stroke="#e3d6bd"/></svg>`;
 const corners = () => CORNER.replace("CLS","tl") + CORNER.replace("CLS","br");
 const photo = (src, label, wide) => `<div class="photo${wide ? " wide" : ""}">${src ? `<img src="${src}" alt="${label}">` : `<div class="ph">photo<br>${label}</div>`}</div>`;
-const todo = (title, text) => `<div class="todo"><b>✎ ${title}</b>${text}</div>`;
-
+const head = (chapter, title) => `<div class="chapter">${chapter}</div><h2>${title}</h2><div class="rule">✦</div>`;
 const daysTogether = () => Math.floor((Date.now() - NIKAH) / 86400000);
 
+const QUIZ = {};
+function quiz(id, q, opts, correct, right, wrongs = {}){
+  QUIZ[id] = {correct, right, wrongs};
+  return `<div class="quiz"><div class="qk">Quick quiz</div><div class="qq">${q}</div>
+    <div class="opts">${opts.map((o,i) => `<button class="opt" data-q="${id}" data-i="${i}">${o}</button>`).join("")}</div>
+    <div class="qr" id="qr-${id}" aria-live="polite"></div></div>`;
+}
+
+function car(fill){
+  return `<path d="M2 26 L2 17 Q3 12 12 11 L26 10 L36 2 L62 2 L74 10 L84 12 Q90 14 90 20 L90 26 Z" fill="${fill}" stroke="#2a2233" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M38.5 5 L49 5 L49 10 L31 10 Z M52 5 L61 5 L69 10 L52 10 Z" fill="#d6e4ec" stroke="#2a2233" stroke-width="1"/>
+    <rect x="85" y="14" width="4" height="3" fill="#ffe7a0"/>
+    <circle cx="20" cy="27" r="7" fill="#2a2233"/><circle cx="20" cy="27" r="2.5" fill="#d8d2c8"/>
+    <circle cx="72" cy="27" r="7" fill="#2a2233"/><circle cx="72" cy="27" r="2.5" fill="#d8d2c8"/>`;
+}
+const CRASH = () => `<div class="crash">
+  <svg viewBox="0 0 340 110" role="img" aria-label="My car gets hit in the front, bonk, and a little heart appears">
+    <rect x="0" y="92" width="340" height="3" rx="1.5" fill="#cdb79a"/>
+    <g fill="#cdb79a" opacity=".6">${Array.from({length:9},(_,i)=>`<rect x="${8+i*38}" y="100" width="18" height="2"/>`).join("")}</g>
+    <g transform="translate(80,58)"><g class="c-mine">${car("#d9b76e")}
+      <path class="c-dent" d="M90 13 L85 16 L89.5 19 L84.5 22 L89 25" stroke="#2a2233" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+    </g></g>
+    <g transform="translate(172,58)"><g class="c-other"><g transform="translate(90,0) scale(-1,1)">${car("#8f98ab")}</g></g></g>
+    <circle class="c-smoke" cx="170" cy="62" r="6" fill="#b9b2a8"/>
+    <circle class="c-smoke s2" cx="167" cy="64" r="5" fill="#c6bfb5"/>
+    <circle class="c-smoke s3" cx="173" cy="63" r="5" fill="#b9b2a8"/>
+    <g class="c-bonk">
+      <polygon points="171,6 178,22 196,16 186,31 202,40 183,42 186,58 171,47 156,58 159,42 140,40 156,31 146,16 164,22" fill="#f6d9a6" stroke="#b8714f" stroke-width="1.2"/>
+      <text x="171" y="40" text-anchor="middle" font-family="Caveat, cursive" font-size="20" font-weight="600" fill="#9a4f2e">bonk!</text>
+    </g>
+    <g transform="translate(116,30)"><path class="c-heart" d="M0 5 C0 -1 9 -1 9 5 C9 -1 18 -1 18 5 C18 11 9 15 9 18 C9 15 0 11 0 5Z" fill="#b8714f"/></g>
+  </svg>
+  <button class="replay" data-act="replay">↻ replay the crash</button>
+</div>`;
+
 const PAGES = [
-  // 0 — Cover
+  // Cover
   () => `<div class="page cover">${corners()}
     <div class="bismillah">بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
     <h1 class="names">Hubbyjon<span class="amp">&amp;</span>Honeypie</h1>
     <div class="rule">✦</div>
-    <div class="date">The cotton anniversary · two years</div>
+    <div class="date">Two years of marriage · the cotton anniversary</div>
     <p class="note">a little book about us, written by me</p>
   </div>`,
 
-  // 1 — Ayah
+  // Ayah
   () => `<div class="page cover">${corners()}
     <p class="ayah">وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً</p>
     <div class="rule">✦</div>
@@ -277,92 +340,148 @@ const PAGES = [
     <div class="ref">Ar-Rum · 30:21</div>
   </div>`,
 
-  // 2 — Chapter I
+  // I — The crash
   () => `<div class="page">${corners()}
-    <div class="chapter">Chapter I</div>
-    <h2>Before there was “us”</h2>
-    <div class="rule">✦</div>
-    ${todo("Your letter", "How did you first hear about Honeypie or see her? What did you think back then? One funny honest detail works great here.")}
-    ${photo("", "how it all started")}
+    ${head("Chapter I · 16 September 2024", "It all started with a crash")}
+    ${CRASH()}
+    <p class="lead">Right before I drove out to our very first date, somebody smashed the front of my car.</p>
+    <p>I guess that’s how life works sometimes. Before it gives you something beautiful, it throws something bad at you first. My story was no exception.</p>
+    ${quiz("crash", "What happened right before our first date?",
+      ["I bought you flowers", "Somebody smashed my car", "I practised my smile in the mirror"], 1,
+      "Correct. Flowers would’ve been cheaper.",
+      {2: "I wish. (Okay, maybe a little.)"})}
   </div>`,
 
-  // 3 — Chapter II
+  // II — Eco Park
   () => `<div class="page">${corners()}
-    <div class="chapter">Chapter II</div>
-    <h2>The first time we met</h2>
-    <div class="rule">✦</div>
-    ${photo("", "the first meeting", true)}
-    ${todo("Your letter", "Where it was, what she wore or said, what you were nervous about. What did you think when you left?")}
+    ${head("Chapter II · The first date", "The Eco Park")}
+    ${photo("", "Eco Park", true)}
+    <p class="lead">We met for the first time at the Eco Park. It was written all over your face that someone had pushed you out of the house with “Go on, go, he’s a good boy.”</p>
+    <p>I’ll be honest, it wasn’t love at first sight. But something about you clearly pulled me in. That interesting smile of yours. Words that actually meant something.</p>
+    <p>I walked away knowing one thing: I wanted to see you again.</p>
   </div>`,
 
-  // 4 — Funny interlude
-  () => `<div class="page cover">${corners()}
-    <div class="chapter">A short intermission</div>
-    <h2>Things nobody knows about us</h2>
-    <div class="rule">✦</div>
-    ${todo("Inside joke", "An inside joke, nickname story, or ‘official facts’ list. For example: ‘Fact #1: Honeypie has never lost an argument. Hubbyjon is still checking.’")}
+  // III — Bon
+  () => `<div class="page">${corners()}
+    ${head("Chapter III · The second date", "The conversation at Bon")}
+    ${photo("", "Bon")}
+    <p class="lead">The second time, we met at Bon. I still laugh that my aunts were sitting right there, and I only noticed them half an hour into our conversation.</p>
+    <p>That conversation decided everything. I have never made a decision so fast in my life.</p>
+    <p>Everything was written by Allah exactly as it should be. That we have so many people in common. That we think the same way and see life the same way. That when I look at your face, I want to kiss it and bite it from a love that doesn’t fit inside me.</p>
+    ${quiz("aunts", "How long did it take me to notice my aunts at Bon?",
+      ["Right away, obviously", "About five minutes", "Half an hour"], 2,
+      "Half an hour. I only had eyes for you. They definitely had eyes for us.",
+      {0: "You give me way too much credit."})}
   </div>`,
 
-  // 5 — Chapter III: Nikah
+  // IV — Third date
   () => `<div class="page">${corners()}
-    <div class="chapter">Chapter III · 19 November 2024</div>
-    <h2>The day of our nikah</h2>
-    <div class="rule">✦</div>
+    ${head("Chapter IV · The third date", "The one our parents ordered")}
+    <p class="lead">Then we both decided: yes, this is it.</p>
+    <p>And here’s the funny part. Our own parents, the same ones rushing us to the wedding, made us go on a third date.</p>
+    <p>It only made us more sure. Sometimes in life you really do just have to wait. With you, it was worth every minute.</p>
+    <p class="note" style="text-align:center">Dates needed to be sure: 2.<br>Dates our parents insisted on: 3.</p>
+  </div>`,
+
+  // V — Nikah
+  () => `<div class="page">${corners()}
+    ${head("Chapter V · 19 November 2024", "Before Allah")}
     ${photo("", "the nikah")}
-    ${todo("Your letter", "What you felt when the nikah was read. One moment from that day only you two remember.")}
+    <p class="lead">After that, everything moved fast. The fotiha and all the formalities. Our sweet messages, each one telling me a little more that you are my person. The invitations we made together.</p>
+    <p>And then, exactly two years ago, we bound ourselves to each other in a sacred marriage, before Allah.</p>
+    <p class="note">The wedding party came on the 26th. But the 19th will always be ours.</p>
   </div>`,
 
-  // 6 — Chapter IV: Year one
+  // VI — Honeymoon months
   () => `<div class="page">${corners()}
-    <div class="chapter">Chapter IV</div>
-    <h2>Year one: learning each other</h2>
-    <div class="rule">✦</div>
-    ${photo("", "year one", true)}
-    ${todo("Your letter", "First home, first trip, first time cooking together, first big argument and how you made up.")}
+    ${head("Chapter VI", "Our honeymoon months")}
+    ${photo("", "our first months at home", true)}
+    <p class="lead">What came next were some of the happiest months of my life: our first months living together.</p>
+    <p>The more I remember those days, the more I understand that they were our real honeymoon. We talked through the nights, slept three or four hours, and woke up in a panic realising we had overslept everything.</p>
+    ${quiz("sleep", "How much did we sleep in those first months?",
+      ["8 healthy hours", "5–6 hours", "3–4 hours, then panic"], 2,
+      "Exactly. Worth every lost hour.",
+      {0: "Who are these people? Not us."})}
   </div>`,
 
-  // 7 — Numbers
+  // VII — March
   () => `<div class="page">${corners()}
-    <div class="chapter">Official statistics</div>
-    <h2>Us, by the numbers</h2>
-    <div class="rule">✦</div>
+    ${head("Chapter VII · Spring 2025", "The plan")}
+    <p class="lead">We weren’t in a hurry to have a baby. I figured it wouldn’t happen quickly, so I suggested we start trying in March.</p>
+    ${quiz("march", "So when did you get pregnant?",
+      ["In the summer", "Next year, like I expected", "In March"], 2,
+      "In March. Haha. Faster than any plan I’ve ever made.",
+      {1: "That was the plan. The plan lost."})}
+    ${photo("", "the test", true)}
+    <p>Honestly, I had a feeling before the test. But when it confirmed it, there was no happier man on earth.</p>
+  </div>`,
+
+  // VIII — Sushi night
+  () => `<div class="page">${corners()}
+    ${head("Chapter VIII · 26 November 2025", "The sushi night")}
+    <p class="lead">Life sped up. I worked, you kept our home. And on 26 November 2025, my chubby one, my little sis and my mommy decided we should celebrate our wedding day.</p>
+    <p>I still remember how cutely we waddled to the sushi bar. We ate, came home, went upstairs, chatting sweetly and getting ready for bed, when suddenly: splash. Your waters broke.</p>
+    <p>I was completely stunned. For the first few minutes I didn’t understand what, why or how. Alhamdulillah, we pulled ourselves together, my mom raced over, and we drove to the maternity hospital.</p>
+    ${quiz("waters", "Where were we when your waters broke?",
+      ["At the sushi bar", "In the car", "At home, five minutes from bed"], 2,
+      "At home, five minutes from bed. He has always had great timing.",
+      {0: "Thank Allah, no. That bar would never forget us."})}
+  </div>`,
+
+  // IX — Muhammad Aziz
+  () => `<div class="page">${corners()}
+    ${head("Chapter IX", "The joy of our life")}
+    <div class="son">
+      <svg class="crescent" viewBox="0 0 40 40" aria-hidden="true"><path d="M26 6 A15 15 0 1 0 26 34 A12 12 0 1 1 26 6Z" fill="#d9b76e"/><circle cx="30" cy="12" r="1.6" fill="#d9b76e"/></svg>
+      <div class="ar">مُحَمَّد عَزِيز</div>
+      <div class="en">Muhammad Aziz</div>
+    </div>
+    <p class="lead">There, going through the hardest moments of your life, you brought into our home, by the will of Allah, the joy of our life: our most beautiful son, Muhammad Aziz.</p>
+    ${photo("", "Muhammad Aziz")}
+    <p>I always thought having a child wouldn’t change me much. In some ways, it didn’t. But it changed one thing for sure. Now I want to live to watch him grow. His first words, his first steps, his first day of school, the day he becomes a man.</p>
+    <p>I want to be that father.</p>
+  </div>`,
+
+  // X — 2026
+  () => `<div class="page">${corners()}
+    ${head("Chapter X · 2026", "The fullest year")}
+    <p class="lead">After that, life ran at double speed. You somehow finished university (somehow!), and then came 2026, the busiest year either of us has ever had.</p>
+    <p>Our son took over our phone galleries. It was a full year, and I’m glad I lived another one with you.</p>
+    ${photo("", "2026", true)}
+  </div>`,
+
+  // Numbers
+  () => `<div class="page">${corners()}
+    ${head("Official statistics", "Us, by the numbers")}
     <div class="stats">
       <div class="stat"><div class="n">${daysTogether()}</div><div class="l">days as husband &amp; wife</div></div>
-      <div class="stat"><div class="n">${(daysTogether()*24).toLocaleString("en-US")}</div><div class="l">hours of me being lucky</div></div>
-      <div class="stat"><div class="n">?</div><div class="l">cities together</div></div>
-      <div class="stat"><div class="n">∞</div><div class="l">times you were right (I'm told)</div></div>
+      <div class="stat"><div class="n">1</div><div class="l">car harmed in the making of this love story</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">dates (one ordered by our parents)</div></div>
+      <div class="stat"><div class="n">3–4</div><div class="l">hours of sleep a night, honeymoon edition</div></div>
+      <div class="stat"><div class="n">1</div><div class="l">son who took over our gallery</div></div>
+      <div class="stat"><div class="n">∞</div><div class="l">times you were right (I’m told)</div></div>
     </div>
-    ${todo("Numbers", "Send me real ones: trips, messages, favourite food ordered, ‘what should we eat’ debates… I can count from your chat export.")}
   </div>`,
 
-  // 8 — Chapter V: Year two
+  // Letter I
   () => `<div class="page">${corners()}
-    <div class="chapter">Chapter V</div>
-    <h2>Year two: building a home</h2>
-    <div class="rule">✦</div>
-    ${photo("", "year two")}
-    ${todo("Your letter", "What changed in the second year. What you are proud of together.")}
+    ${head("Last pages", "To my wife")}
+    <p class="lead">Life, as I always say, has its ups and downs, in the world and between two people. But I believe that with every year, my love for you only grows.</p>
+    <p>And yes, right now might not be my easiest season when it comes to the time I give our family. But I know I’m doing it first of all for you: so that our children, our parents and the two of us can live a decent life and, by the will of Allah, never be in real need.</p>
+    <p>And I see what you do. For me, for Muhammad Aziz, for all of us. I see how hard you try. I’m sure Allah will reward every effort you make, and I’ll try to deliver some of that reward in this world :)</p>
   </div>`,
 
-  // 9 — Chapter VI: Now
+  // Letter II + dua
   () => `<div class="page">${corners()}
-    <div class="chapter">Chapter VI</div>
-    <h2>Now</h2>
+    ${head("In shaa Allah", "The years ahead")}
+    <p class="lead">May Allah let us live many more happy years like these together. Feeling every kind of emotion. Visiting lots of countries. With more children. With our parents living long lives beside us. Simply praying, and enjoying this life, together with you.</p>
     <div class="rule">✦</div>
-    ${photo("", "us today", true)}
-    ${todo("Your letter", "Who she is to you today. What you love in your everyday life together.")}
+    <p class="ayah" style="font-size:22px">بَارَكَ ٱللَّٰهُ لَكُمَا وَبَارَكَ عَلَيْكُمَا وَجَمَعَ بَيْنَكُمَا فِي خَيْرٍ</p>
+    <p class="ayah-en">May Allah bless you both, shower His blessings upon you, and keep you together in goodness.</p>
+    <p class="note" style="text-align:right">I love you.<br>— your Hubbyjon</p>
   </div>`,
 
-  // 10 — Letter ending + dua
-  () => `<div class="page">${corners()}
-    <div class="chapter">Last pages</div>
-    <h2>To my wife</h2>
-    <div class="rule">✦</div>
-    ${todo("Your letter, final part", "The warmest part. Your promise or dua for the years ahead. Finish with something that leads into the gift, e.g. ‘…and for our third year, I want us to make something with our own hands.’")}
-    <p class="note" style="text-align:right">— your Hubbyjon</p>
-  </div>`,
-
-  // 11 — Gift reveal
+  // Gift reveal
   () => `<div class="page cover">${corners()}
     <div class="chapter">Your gift</div>
     <div class="wheel-wrap">
@@ -381,14 +500,13 @@ const PAGES = [
       </svg>
     </div>
     <h2>A pottery class, just the two of us</h2>
-    <p class="reveal">Two years of building a life. Now let’s make something with our hands.</p>
-    <p class="note">(yes, like that scene in the movie. no, I will not be serious the whole time)</p>
+    <p class="reveal">Two years of building a life together. For year three, let’s make something with our own hands.</p>
+    <p class="note">(I promise to be serious at least 40% of the time)</p>
   </div>`,
 
-  // 12 — Calendar
+  // Calendar + P.S.
   () => `<div class="page">${corners()}
-    <div class="chapter">One last thing</div>
-    <h2>Pick our day</h2>
+    ${head("One last thing", "Pick our day")}
     <p style="text-align:center">Choose any day you like. I’ll take care of the rest.</p>
     <div class="cal" id="cal"></div>
     <button class="cta" id="book" disabled>Book our pottery day</button>
@@ -396,48 +514,148 @@ const PAGES = [
   </div>`,
 ];
 
-/* ---------- Sky ---------- */
+/* ---------- Sky: Milky Way, colour-true stars, slow celestial drift, city silhouette ---------- */
 const cv = document.getElementById("sky"), cx = cv.getContext("2d");
-let stars = [], W = 0, H = 0, shoot = null;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-function resize(){
-  const dpr = Math.min(devicePixelRatio || 1, 2);
-  W = innerWidth; H = innerHeight; cv.width = W*dpr; cv.height = H*dpr; cx.setTransform(dpr,0,0,dpr,0,0);
-  const n = Math.round(W*H/2600);
-  stars = Array.from({length:n}, () => ({x:Math.random()*W, y:Math.random()*H*0.95, r:Math.random()*1.3+.2, p:Math.random()*6.28, s:Math.random()*.02+.004, warm:Math.random()<.25}));
-  placeStar();
-}
-function draw(t){
-  cx.clearRect(0,0,W,H);
-  for(const s of stars){
-    const a = reduce ? .7 : .45 + .55*Math.sin(s.p + t*s.s*0.06);
-    cx.globalAlpha = Math.max(.08, a);
-    cx.fillStyle = s.warm ? "#ffe6b0" : "#e8ecff";
-    cx.beginPath(); cx.arc(s.x, s.y, s.r, 0, 6.283); cx.fill();
+let W, H, dpr, pole, R, layer, horizon, bright = [], shoot = null;
+const rand = (a,b) => a + Math.random()*(b-a);
+const gauss = () => { let u = 0, v = 0; while(!u) u = Math.random(); while(!v) v = Math.random(); return Math.sqrt(-2*Math.log(u))*Math.cos(6.2832*v); };
+const TEMPS = ["#a9bcff","#c4d2ff","#e4eaff","#fbf8ff","#fff3e2","#ffe0b8","#ffc98a"];
+const starColor = () => { const r = Math.random(); return r<.1?TEMPS[0]:r<.26?TEMPS[1]:r<.46?TEMPS[2]:r<.7?TEMPS[3]:r<.85?TEMPS[4]:r<.95?TEMPS[5]:TEMPS[6]; };
+
+function buildSky(){
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+  pole = {x: W*0.7, y: -H*0.12};
+  R = Math.ceil(Math.max(Math.hypot(pole.x, H - pole.y), Math.hypot(W - pole.x, H - pole.y))) + 10;
+  const S = 2*R, ls = Math.min(dpr, 2600/S);
+  layer = document.createElement("canvas");
+  layer.width = Math.round(S*ls); layer.height = Math.round(S*ls);
+  const g = layer.getContext("2d");
+  g.scale(ls, ls); g.translate(R, R);
+
+  // Milky Way band, local coords around the pole
+  const c0 = {x: -W*0.25, y: H*0.62}, ang = 1.08, dx = Math.cos(ang), dy = Math.sin(ang), nx = -dy, ny = dx;
+  const bw = Math.max(W, H)*0.16;
+  const at = (u, v) => [c0.x + dx*u + nx*v, c0.y + dy*u + ny*v];
+  const core = u => Math.exp(-Math.pow((u + R*0.15)/(R*0.7), 2));
+
+  for(let i=0;i<220;i++){
+    const u = rand(-1.3*R, 1.3*R), v = gauss()*bw*0.55, [x,y] = at(u,v), r = rand(bw*0.35, bw*1.1);
+    const k = .5 + core(u), pal = Math.random();
+    const col = pal < .55 ? "125,140,215" : pal < .82 ? "180,165,225" : "255,214,170";
+    const grd = g.createRadialGradient(x,y,0,x,y,r);
+    grd.addColorStop(0, `rgba(${col},${(rand(.02,.045)*k).toFixed(3)})`); grd.addColorStop(1, `rgba(${col},0)`);
+    g.fillStyle = grd; g.beginPath(); g.arc(x,y,r,0,6.2832); g.fill();
   }
+  const bandN = Math.min(26000, Math.round(S*S/160));
+  for(let i=0;i<bandN;i++){
+    const u = rand(-1.3*R, 1.3*R), v = gauss()*bw*0.5, [x,y] = at(u,v), s = rand(.35, .9);
+    g.globalAlpha = rand(.08, .5)*(.55 + core(u)*.6); g.fillStyle = starColor(); g.fillRect(x, y, s, s);
+  }
+  g.globalAlpha = 1;
+  g.globalCompositeOperation = "destination-out";
+  for(let i=0;i<120;i++){
+    const u = rand(-1.3*R, 1.3*R), v = gauss()*bw*0.12 + bw*0.06, [x,y] = at(u,v), r = rand(bw*0.1, bw*0.3);
+    const grd = g.createRadialGradient(x,y,0,x,y,r);
+    grd.addColorStop(0, `rgba(0,0,0,${rand(.12,.3).toFixed(2)})`); grd.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = grd; g.beginPath(); g.arc(x,y,r,0,6.2832); g.fill();
+  }
+  g.globalCompositeOperation = "source-over";
+  const fieldN = Math.round(S*S/1700);
+  for(let i=0;i<fieldN;i++){
+    const x = rand(-R, R), y = rand(-R, R), r = .3 + Math.pow(Math.random(), 5)*1.1;
+    g.globalAlpha = rand(.25, .85); g.fillStyle = starColor(); g.beginPath(); g.arc(x,y,r,0,6.2832); g.fill();
+  }
+  g.globalAlpha = 1;
+
+  // bright twinkling stars, drawn every frame
+  const bn = Math.round(36 + W*H/16000);
+  bright = Array.from({length:bn}, () => {
+    const a = Math.random()*6.2832, d = Math.sqrt(Math.random())*R;
+    return {x: Math.cos(a)*d, y: Math.sin(a)*d, r: .9 + Math.pow(Math.random(), 3)*1.7, c: starColor(), p: Math.random()*6.28, s: rand(.0015, .004)};
+  });
+
+  // horizon: airglow, city glow, hills, domes and minarets
+  horizon = document.createElement("canvas");
+  horizon.width = cv.width; horizon.height = cv.height;
+  const h = horizon.getContext("2d"); h.scale(dpr, dpr);
+  const glow = h.createLinearGradient(0, H*0.62, 0, H);
+  glow.addColorStop(0, "rgba(40,55,120,0)"); glow.addColorStop(.7, "rgba(60,70,140,.22)"); glow.addColorStop(1, "rgba(255,170,110,.2)");
+  h.fillStyle = glow; h.fillRect(0, H*0.62, W, H*0.38);
+  const base = H - Math.max(36, H*0.06);
+  h.fillStyle = "#03050c";
+  h.beginPath(); h.moveTo(0, H);
+  for(let x=0; x<=W; x+=6){
+    const y = base - 10 - Math.sin(x/170)*9 - Math.sin(x/53 + 1.3)*4 - Math.sin(x/23)*1.5;
+    h.lineTo(x, y);
+  }
+  h.lineTo(W, H); h.closePath(); h.fill();
+  // city cluster
+  const u = Math.min(W, 900)/900, cx0 = W*0.1, cy = base - 6;
+  const blocks = [[0,28,34],[30,22,48],[50,30,26],[78,18,40],[94,26,30],[150,24,36],[172,30,22],[200,20,44],[218,34,28],[250,22,38]];
+  blocks.forEach(([x,w,hh]) => h.fillRect(cx0 + x*u, cy - hh*u, w*u, hh*u + 8));
+  // mosque: drum, dome, two minarets
+  const mx = cx0 + 125*u;
+  h.fillRect(mx - 22*u, cy - 34*u, 44*u, 34*u + 8);
+  h.beginPath(); h.ellipse(mx, cy - 34*u, 20*u, 24*u, 0, Math.PI, 0); h.fill();
+  h.fillRect(mx - 1*u, cy - 66*u, 2*u, 10*u);
+  [mx - 36*u, mx + 32*u].forEach(x0 => {
+    h.fillRect(x0, cy - 78*u, 4.5*u, 78*u + 8);
+    h.fillRect(x0 - 2*u, cy - 60*u, 8.5*u, 3*u);
+    h.beginPath(); h.moveTo(x0 - 0.5*u, cy - 78*u); h.lineTo(x0 + 2.25*u, cy - 92*u); h.lineTo(x0 + 5*u, cy - 78*u); h.fill();
+  });
+  // a few warm windows
+  for(let i=0;i<26;i++){
+    const [x,w,hh] = blocks[i % blocks.length];
+    h.fillStyle = `rgba(255,${190 + Math.random()*40|0},120,${rand(.35,.75).toFixed(2)})`;
+    h.fillRect(cx0 + (x + 3 + Math.random()*(w-6))*u, cy - (6 + Math.random()*(hh-10))*u, 1.6*u + .6, 2*u + .6);
+  }
+}
+
+function draw(t){
+  cx.setTransform(dpr,0,0,dpr,0,0);
+  cx.clearRect(0,0,W,H);
+  cx.save();
+  cx.translate(pole.x, pole.y);
+  cx.rotate(reduce ? 0 : t*4e-7);
+  cx.drawImage(layer, -R, -R, 2*R, 2*R);
+  for(const s of bright){
+    const tw = reduce ? .85 : .7 + .3*Math.sin(s.p + t*s.s) * Math.sin(s.p*1.7 + t*s.s*2.3);
+    const rr = s.r*4.5;
+    const grd = cx.createRadialGradient(s.x,s.y,0,s.x,s.y,rr);
+    grd.addColorStop(0, s.c); grd.addColorStop(.18, s.c + "55"); grd.addColorStop(1, s.c + "00");
+    cx.globalAlpha = tw; cx.fillStyle = grd; cx.beginPath(); cx.arc(s.x,s.y,rr,0,6.2832); cx.fill();
+    cx.fillStyle = "#ffffff"; cx.beginPath(); cx.arc(s.x,s.y,s.r*.55,0,6.2832); cx.fill();
+  }
+  cx.restore();
+  cx.globalAlpha = 1;
   if(!reduce){
-    if(!shoot && Math.random() < .002) shoot = {x:Math.random()*W*.7, y:Math.random()*H*.35, life:0};
+    if(!shoot && Math.random() < .0018) shoot = {x: rand(W*.1, W*.8), y: rand(0, H*.35), vx: rand(5,8)*(Math.random()<.5?-1:1), vy: rand(2,4), life: 0};
     if(shoot){
-      shoot.life += 1; const L = shoot.life;
-      const g = cx.createLinearGradient(shoot.x+L*7, shoot.y+L*3, shoot.x+L*7-90, shoot.y+L*3-38);
-      g.addColorStop(0,"#fff8e0"); g.addColorStop(1,"#fff8e000");
-      cx.globalAlpha = Math.max(0, 1 - L/50); cx.strokeStyle = g; cx.lineWidth = 1.4;
-      cx.beginPath(); cx.moveTo(shoot.x+L*7, shoot.y+L*3); cx.lineTo(shoot.x+L*7-90, shoot.y+L*3-38); cx.stroke();
-      if(L > 50) shoot = null;
+      const L = ++shoot.life, hx = shoot.x + shoot.vx*L, hy = shoot.y + shoot.vy*L;
+      const grd = cx.createLinearGradient(hx, hy, hx - shoot.vx*14, hy - shoot.vy*14);
+      grd.addColorStop(0, "rgba(255,250,235,.95)"); grd.addColorStop(1, "rgba(255,250,235,0)");
+      cx.globalAlpha = Math.max(0, 1 - L/45); cx.strokeStyle = grd; cx.lineWidth = 1.3;
+      cx.beginPath(); cx.moveTo(hx, hy); cx.lineTo(hx - shoot.vx*14, hy - shoot.vy*14); cx.stroke();
+      cx.globalAlpha = 1;
+      if(L > 45) shoot = null;
     }
   }
-  cx.globalAlpha = 1;
+  cx.setTransform(1,0,0,1,0,0);
+  cx.drawImage(horizon, 0, 0);
   requestAnimationFrame(draw);
 }
 const starBtn = document.getElementById("star");
 function placeStar(){
-  // top-right of the sky, clear of the arch text
-  starBtn.style.left = Math.round(W*0.76) + "px";
-  starBtn.style.top = Math.round(Math.max(70, H*0.14)) + "px";
+  starBtn.style.left = Math.round(W*0.78) + "px";
+  starBtn.style.top = Math.round(Math.max(76, H*0.13)) + "px";
 }
-addEventListener("resize", resize); resize(); requestAnimationFrame(draw);
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { buildSky(); placeStar(); }, 200); });
+buildSky(); placeStar(); requestAnimationFrame(draw);
 
-/* ---------- Ambient sound (generated, no file) ---------- */
+/* ---------- Ambient sound (generated in the browser) ---------- */
 let ac = null, master = null, soundOn = false;
 function startAmbient(){
   try{
@@ -449,7 +667,6 @@ function startAmbient(){
     verb.buffer = buf;
     const wet = ac.createGain(); wet.gain.value = .7;
     lp.connect(master); lp.connect(verb); verb.connect(wet); wet.connect(master); master.connect(ac.destination);
-    // soft D major add9 pad, each voice breathing slowly
     [146.83, 220.0, 293.66, 329.63, 369.99, 440.0].forEach((f, i) => {
       const o = ac.createOscillator(), g = ac.createGain(), lfo = ac.createOscillator(), lg = ac.createGain();
       o.type = i % 2 ? "sine" : "triangle"; o.frequency.value = f; o.detune.value = (Math.random()-.5)*8;
@@ -506,6 +723,20 @@ leaf.addEventListener("touchend", e => {
   tx = null;
 });
 
+// quiz answers and crash replay
+leaf.addEventListener("click", e => {
+  if(e.target.closest("[data-act=replay]")){ const st = leaf.scrollTop; leaf.innerHTML = PAGES[idx](); leaf.scrollTop = st; return; }
+  const b = e.target.closest(".opt"); if(!b) return;
+  const q = QUIZ[b.dataset.q], i = +b.dataset.i, out = document.getElementById("qr-" + b.dataset.q);
+  if(i === q.correct){
+    b.closest(".opts").querySelectorAll(".opt").forEach(o => o.classList.remove("wrong"));
+    b.classList.add("right"); out.textContent = q.right; out.className = "qr ok";
+  }else{
+    b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong");
+    out.textContent = q.wrongs[i] || "Nope. Try again, Honeypie 🙂"; out.className = "qr";
+  }
+});
+
 /* ---------- Open ---------- */
 starBtn.addEventListener("click", () => {
   document.getElementById("intro").classList.add("gone");
@@ -516,19 +747,19 @@ starBtn.addEventListener("click", () => {
   render();
 });
 
-/* ---------- Calendar ---------- */
+/* ---------- Calendar + P.S. envelope ---------- */
 let chosen = null;
 try{ const s = localStorage.getItem("pottery-day"); if(s) chosen = new Date(s); }catch(e){}
 function mountCalendar(){
   const box = document.getElementById("cal"); if(!box) return;
   const today = new Date(); today.setHours(0,0,0,0);
   const first = new Date(today.getFullYear(), today.getMonth(), 1);
-  let view = chosen ? new Date(chosen.getFullYear(), chosen.getMonth(), 1) : new Date(first);
+  let view = chosen && chosen > today ? new Date(chosen.getFullYear(), chosen.getMonth(), 1) : new Date(first);
   const fmt = d => d.toLocaleDateString("en-GB", {weekday:"long", day:"numeric", month:"long", year:"numeric"});
   const bookBtn = document.getElementById("book"), done = document.getElementById("done");
   function paint(){
     const y = view.getFullYear(), m = view.getMonth();
-    const startDow = (new Date(y, m, 1).getDay() + 6) % 7; // Monday first
+    const startDow = (new Date(y, m, 1).getDay() + 6) % 7;
     const nDays = new Date(y, m+1, 0).getDate();
     let html = `<div class="cal-head">
       <button class="cal-nav" id="cp" aria-label="Previous month" ${view <= first ? "disabled" : ""}>‹</button>
@@ -546,15 +777,30 @@ function mountCalendar(){
     box.querySelector("#cp").onclick = () => { view = new Date(y, m-1, 1); paint(); };
     box.querySelector("#cn").onclick = () => { view = new Date(y, m+1, 1); paint(); };
     box.querySelectorAll(".day:not(:disabled)").forEach(b => b.onclick = () => { chosen = new Date(y, m, +b.dataset.d); paint(); });
-    bookBtn.disabled = !chosen;
+    bookBtn.disabled = !(chosen && chosen > today);
   }
   bookBtn.onclick = () => {
     try{ localStorage.setItem("pottery-day", chosen.toISOString()); }catch(e){}
     box.hidden = true; bookBtn.hidden = true; done.hidden = false;
     done.innerHTML = `<p class="big">It’s a date 🤍</p>
       <p>${fmt(chosen)}</p>
-      <p class="note">You, me, and a lump of clay. Happy anniversary, Honeypie.</p>
-      <button class="nav-btn" id="change" style="justify-self:center;color:#8a6a3c;border-color:#d8c29a;background:none">Change the day</button>`;
+      <p class="note">You, me, and a lump of clay.</p>
+      <div class="rule">✦</div>
+      <div class="env-label">…but wait, there’s one more thing</div>
+      <button class="env" id="env" aria-label="Open the envelope"><span class="body"></span><span class="flap"></span><span class="seal">✦</span></button>
+      <div id="psbox"></div>
+      <button class="link-btn" id="change">change the day</button>`;
+    done.querySelector("#env").onclick = e => {
+      const env = e.currentTarget; if(env.classList.contains("open")) return;
+      env.classList.add("open");
+      setTimeout(() => {
+        document.getElementById("psbox").innerHTML = `<div class="ps">
+          <p class="note">P.S.</p>
+          <p>Open the drawer next to our bed. A small extra gift is waiting for you there.</p>
+          <p class="note" style="text-align:right">Happy anniversary, Honeypie 🤍</p></div>`;
+        leaf.scrollTo({top: leaf.scrollHeight, behavior: reduce ? "auto" : "smooth"});
+      }, reduce ? 0 : 650);
+    };
     done.querySelector("#change").onclick = () => { box.hidden = false; bookBtn.hidden = false; done.hidden = true; paint(); };
   };
   paint();
