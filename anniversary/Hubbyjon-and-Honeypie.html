@@ -774,36 +774,89 @@ function placeStar(){
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { buildSky(); placeStar(); }, 200); });
 buildSky(); placeStar(); requestAnimationFrame(draw);
 
-/* ---------- Ambient sound (generated in the browser) ---------- */
-let ac = null, master = null, soundOn = false;
-function startAmbient(){
-  try{
-    ac = new (window.AudioContext || window.webkitAudioContext)();
-    master = ac.createGain(); master.gain.value = 0;
-    const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 900;
-    const verb = ac.createConvolver(); const len = ac.sampleRate*3.5, buf = ac.createBuffer(2, len, ac.sampleRate);
-    for(let c=0;c<2;c++){ const d = buf.getChannelData(c); for(let i=0;i<len;i++) d[i] = (Math.random()*2-1)*Math.pow(1-i/len, 2.6); }
-    verb.buffer = buf;
-    const wet = ac.createGain(); wet.gain.value = .7;
-    lp.connect(master); lp.connect(verb); verb.connect(wet); wet.connect(master); master.connect(ac.destination);
-    [146.83, 220.0, 293.66, 329.63, 369.99, 440.0].forEach((f, i) => {
-      const o = ac.createOscillator(), g = ac.createGain(), lfo = ac.createOscillator(), lg = ac.createGain();
-      o.type = i % 2 ? "sine" : "triangle"; o.frequency.value = f; o.detune.value = (Math.random()-.5)*8;
-      g.gain.value = .035; lfo.frequency.value = .04 + Math.random()*.06; lg.gain.value = .03;
-      lfo.connect(lg); lg.connect(g.gain); o.connect(g); g.connect(lp); o.start(); lfo.start();
-    });
-    master.gain.linearRampToValueAtTime(.55, ac.currentTime + 4);
-    soundOn = true; syncSound();
-  }catch(e){ soundOn = false; }
-}
+/* ---------- Ambient sound ----------
+   Rendered once (offline) into a seamless 24 s loop and played through an <audio> element,
+   so it is loud enough on phone speakers and still plays with the iPhone silent switch on. */
 const soundBtn = document.getElementById("sound");
+let amb = null, soundOn = false, wantSound = false;
+const q24 = f => Math.round(f*24)/24; // every voice repeats exactly every 24 s
+function wav(data, sr){
+  const n = data.length, buf = new ArrayBuffer(44 + n*2), v = new DataView(buf);
+  const w = (o, s) => { for(let i=0;i<s.length;i++) v.setUint8(o+i, s.charCodeAt(i)); };
+  w(0,"RIFF"); v.setUint32(4, 36 + n*2, true); w(8,"WAVE"); w(12,"fmt ");
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,sr,true); v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true);
+  w(36,"data"); v.setUint32(40, n*2, true);
+  for(let i=0;i<n;i++){ const s = Math.max(-1, Math.min(1, data[i])); v.setInt16(44 + i*2, s*32767, true); }
+  return new Blob([buf], {type:"audio/wav"});
+}
+function renderAmbient(){
+  return new Promise(resolve => {
+    try{
+      const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      if(!OAC) return resolve(null);
+      const sr = 22050, T = 24, oc = new OAC(1, sr*T*2, sr);
+      const out = oc.createGain(); out.connect(oc.destination);
+      const lp = oc.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2400;
+      const verb = oc.createConvolver(), len = sr*3, ir = oc.createBuffer(1, len, sr), d = ir.getChannelData(0);
+      for(let i=0;i<len;i++) d[i] = (Math.random()*2-1)*Math.pow(1-i/len, 2.4);
+      verb.buffer = ir;
+      const wet = oc.createGain(); wet.gain.value = .6;
+      lp.connect(out); lp.connect(verb); verb.connect(wet); wet.connect(out);
+      // soft D major pad, each voice doubled a hair apart for warmth, breathing slowly
+      [146.83, 220, 293.66, 329.63, 369.99, 440, 587.33].forEach((f, i) => {
+        [0, 1/24].forEach(off => {
+          const o = oc.createOscillator(), g = oc.createGain(), l = oc.createOscillator(), lg = oc.createGain();
+          o.type = i % 2 ? "sine" : "triangle"; o.frequency.value = q24(f) + off;
+          g.gain.value = .03; l.frequency.value = (1 + i % 2)/24; lg.gain.value = .022;
+          l.connect(lg); lg.connect(g.gain); o.connect(g); g.connect(lp); o.start(0); l.start(0);
+        });
+      });
+      // gentle chimes, pentatonic, same pattern in both halves
+      const notes = [587.33, 659.25, 739.99, 880, 987.77, 739.99];
+      [1.5, 5.2, 9.1, 13.4, 17.2, 21].forEach((t, i) => [t, t + T].forEach(tt => {
+        const o = oc.createOscillator(), o2 = oc.createOscillator(), g = oc.createGain(), g2 = oc.createGain();
+        o.frequency.value = notes[i]; o2.frequency.value = notes[i]*2; g2.gain.value = .22;
+        o2.connect(g2); g2.connect(g); o.connect(g); g.connect(lp);
+        g.gain.setValueAtTime(0, tt); g.gain.linearRampToValueAtTime(.09, tt + .02); g.gain.exponentialRampToValueAtTime(.0001, tt + 4.5);
+        o.start(tt); o2.start(tt); o.stop(tt + 4.6); o2.stop(tt + 4.6);
+      }));
+      let finished = false;
+      const done = b => {
+        if(finished || !b) return; finished = true;
+        try{
+          const loop = b.getChannelData(0).slice(sr*T, sr*T*2); // second pass: reverb already warm, loops seamlessly
+          let peak = 0; for(let i=0;i<loop.length;i++) peak = Math.max(peak, Math.abs(loop[i]));
+          const k = peak ? .85/peak : 1; for(let i=0;i<loop.length;i++) loop[i] *= k;
+          resolve(URL.createObjectURL(wav(loop, sr)));
+        }catch(e){ resolve(null); }
+      };
+      oc.oncomplete = e => done(e.renderedBuffer);
+      const p = oc.startRendering();
+      if(p && p.then) p.then(done).catch(() => resolve(null));
+    }catch(e){ resolve(null); }
+  });
+}
 function syncSound(){ soundBtn.textContent = soundOn ? "♪ Sound on" : "♪ Sound off"; soundBtn.setAttribute("aria-pressed", soundOn); }
+function playAmb(){
+  if(!amb) return;
+  soundOn = true; syncSound();
+  const p = amb.play();
+  if(p && p.catch) p.catch(() => { soundOn = false; syncSound(); });
+}
+function startAmbient(){
+  wantSound = true;
+  try{ if(navigator.audioSession) navigator.audioSession.type = "playback"; }catch(e){}
+  playAmb();
+}
+renderAmbient().then(url => {
+  if(!url) return;
+  amb = new Audio(url); amb.loop = true; amb.preload = "auto"; amb.setAttribute("playsinline", "");
+  if(wantSound && !soundOn) playAmb();
+});
 soundBtn.addEventListener("click", () => {
-  if(!ac){ startAmbient(); return; }
-  soundOn = !soundOn;
-  master.gain.cancelScheduledValues(ac.currentTime);
-  master.gain.linearRampToValueAtTime(soundOn ? .55 : 0, ac.currentTime + 1.2);
-  if(soundOn) ac.resume(); syncSound();
+  if(soundOn){ if(amb) amb.pause(); soundOn = false; wantSound = false; syncSound(); }
+  else startAmbient();
 });
 
 /* ---------- Book ---------- */
