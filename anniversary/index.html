@@ -201,6 +201,7 @@ body{
 /* Numbers */
 .stats{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:10px}
 .stat{border:1px solid #d8c29a;border-radius:10px;padding:14px 10px;text-align:center;background:#fffaf1}
+.stat.wide{grid-column:1 / -1}
 .stat .n{font-family:var(--f-display);font-size:34px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;color:#4a3426}
 .stat .l{font-size:14px;color:var(--ink-soft);margin-top:6px;line-height:1.3}
 
@@ -465,10 +466,6 @@ const PAGES = [
     ${CRASH()}
     <p class="lead">Right before I drove out to our very first date, somebody smashed the front of my car.</p>
     <p>I guess that’s how life works sometimes. Before it gives you something beautiful, it throws something bad at you first. My story was no exception.</p>
-    ${quiz("crash", "What happened right before our first date?",
-      ["I bought you flowers", "Somebody smashed my car", "I practised my smile in the mirror"], 1,
-      "Correct. Flowers would’ve been cheaper.",
-      {2: "I wish. (Okay, maybe a little.)"})}
   </div>`,
 
   // II — Eco Park
@@ -487,10 +484,6 @@ const PAGES = [
     <p class="lead">The second time, we met at Bon. I still laugh that my aunts were sitting right there, and I only noticed them half an hour into our conversation.</p>
     <p>That conversation decided everything. I have never made a decision so fast in my life.</p>
     <p>Everything was written by Allah exactly as it should be. That we have so many people in common. That we think the same way and see life the same way. That when I look at your face, I want to kiss it and bite it from a love that doesn’t fit inside me.</p>
-    ${quiz("aunts", "How long did it take me to notice my aunts at Bon?",
-      ["Right away, obviously", "About five minutes", "Half an hour"], 2,
-      "Half an hour. I only had eyes for you. They definitely had eyes for us.",
-      {0: "You give me way too much credit."})}
   </div>`,
 
   // IV — Third date
@@ -504,10 +497,10 @@ const PAGES = [
 
   // V — Nikah
   () => `<div class="page">${corners()}
-    ${head("Chapter V · 19 November 2024", "Before Allah")}
+    ${head("Chapter V · 19 November 2024", "Our nikah")}
     ${ill(RINGS)}
     <p class="lead">After that, everything moved fast. The fotiha and all the formalities. Our sweet messages, each one telling me a little more that you are my person. The invitations we made together.</p>
-    <p>And then, exactly two years ago, we bound ourselves to each other in a sacred marriage, before Allah.</p>
+    <p>And then, exactly two years ago, we bound ourselves to each other in a sacred marriage, with Allah as our witness.</p>
     <p class="note">The wedding party came on the 26th. But the 19th will always be ours.</p>
   </div>`,
 
@@ -542,10 +535,6 @@ const PAGES = [
     <p class="lead">Life sped up. I worked, you kept our home. And on 26 November 2025, my chubby one, my little sis and my mommy decided we should celebrate our wedding day.</p>
     <p>I still remember how cutely we waddled to the sushi bar. We ate, came home, went upstairs, chatting sweetly and getting ready for bed, when suddenly: splash. Your waters broke.</p>
     <p>I was completely stunned. For the first few minutes I didn’t understand what, why or how. Alhamdulillah, we pulled ourselves together, my mom raced over, and we drove to the maternity hospital.</p>
-    ${quiz("waters", "Where were we when your waters broke?",
-      ["At the sushi bar", "In the car", "At home, five minutes from bed"], 2,
-      "At home, five minutes from bed. He has always had great timing.",
-      {0: "Thank Allah, no. That bar would never forget us."})}
   </div>`,
 
   // IX — Muhammad Aziz
@@ -573,12 +562,15 @@ const PAGES = [
   () => `<div class="page">${corners()}
     ${head("Official statistics", "Us, by the numbers")}
     <div class="stats">
-      <div class="stat"><div class="n">${daysTogether()}</div><div class="l">days as husband &amp; wife</div></div>
+      <div class="stat wide"><div class="n">${daysTogether()}</div><div class="l">days as husband &amp; wife</div></div>
       <div class="stat"><div class="n">1</div><div class="l">car harmed in the making of this love story</div></div>
       <div class="stat"><div class="n">3</div><div class="l">dates (one ordered by our parents)</div></div>
       <div class="stat"><div class="n">3–4</div><div class="l">hours of sleep a night, honeymoon edition</div></div>
       <div class="stat"><div class="n">1</div><div class="l">son who took over our gallery</div></div>
-      <div class="stat"><div class="n">∞</div><div class="l">times you were right (I’m told)</div></div>
+      <div class="stat"><div class="n">100+</div><div class="l">condoms used (5 of them gave up on us)</div></div>
+      <div class="stat"><div class="n">10+</div><div class="l">rounds of chips &amp; sausages as fuel</div></div>
+      <div class="stat"><div class="n">70+</div><div class="l">back massages for your Hubbyjon</div></div>
+      <div class="stat"><div class="n">1000+</div><div class="l">times I bit and kissed you</div></div>
     </div>
   </div>`,
 
